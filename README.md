@@ -1,4 +1,4 @@
-# 🛡️ Rakshak AI (रक्षक AI)
+# 🛡️ Rakshak AI
 > **Your Intelligent Guardian Against Digital Fraud**
 
 [![React Native](https://img.shields.io/badge/React_Native-0.81-blue.svg?style=flat&logo=react)](https://reactnative.dev/)
