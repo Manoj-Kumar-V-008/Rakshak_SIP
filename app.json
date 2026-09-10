@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Rakshak AI",
+    "slug": "rakshak-ai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "android": {
+      "package": "com.manojvfire.rakshakai",
+      "versionCode": 1
+    },
+    "plugins": [
+      "expo-secure-store"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "38e0e135-4cbc-43e8-bc15-38cad13fc870"
+      }
+    },
+    "owner": "manojv8s-organization"
+  }
+}
