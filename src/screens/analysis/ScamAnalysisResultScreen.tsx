@@ -7,13 +7,10 @@ import { StatusBadge } from '../../components/common/StatusBadge';
 import { CustomButton } from '../../components/common/CustomButton';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { AnalysisResult } from '../../types/analysis';
 
 interface RouteParams {
-  scamText: string;
-  riskScore: number;
-  scamType: string;
-  indicators: string[];
-  remediationSteps: string[];
+  result: AnalysisResult;
 }
 
 export const ScamAnalysisResultScreen: React.FC = () => {
@@ -21,15 +18,8 @@ export const ScamAnalysisResultScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   
-  const params = (route.params as RouteParams) || {
-    scamText: 'Unverified SMS message logs.',
-    riskScore: 78,
-    scamType: 'Phishing Threat Alert',
-    indicators: ['Fear tactics detected', 'Urgent call-to-action details found'],
-    remediationSteps: ['Never share payment links', 'Report contact to local authorities'],
-  };
-
-  const { scamText, riskScore, scamType, indicators, remediationSteps } = params;
+  const { result } = route.params as RouteParams;
+  const { displayText: scamText, riskScore, scamType, indicators, remediationSteps } = result;
 
   // Resolve threat rating colors and details
   const getThreatDetails = () => {

@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0",
+  "signals": [
+    {"id":"authority_impersonation","label":"Impersonates law enforcement or an authority","category":"impersonation","weight":0.45,"patterns":["cbi","police","customs","inspector","cyber crime","income tax"]},
+    {"id":"legal_threat","label":"Uses legal threats or a digital-arrest claim","category":"coercion","weight":0.50,"patterns":["digital arrest","under arrest","arrest warrant","narcotics","money laundering","case registered","parcel.*drugs"]},
+    {"id":"urgency","label":"Creates artificial urgency","category":"urgency","weight":0.30,"patterns":["immediately","right now","within 24 hours","expires today","tonight","last chance","turant","abhi"]},
+    {"id":"secrecy_isolation","label":"Pressures you to keep the matter secret","category":"coercion","weight":0.45,"patterns":["do not tell anyone","don't tell anyone","stay on the video call","mat batana","kisi ko mat batana"]},
+    {"id":"credential_request","label":"Requests sensitive credentials","category":"financial","weight":0.62,"patterns":["(?:share|send|tell|give|provide|enter)\\W+(?:\\w+\\W+){0,4}(?:otp|pin|cvv|password)","(?:otp|pin|cvv|password)\\W+(?:share|send|tell|do)"]},
+    {"id":"payment_request","label":"Requests an immediate payment or transfer","category":"financial","weight":0.42,"patterns":["transfer (?:rs|inr|₹|money|payment)","pay now","upi (?:deposit|payment)","verification fee","processing fee","paise transfer"]},
+    {"id":"utility_disconnect","label":"Threatens utility disconnection","category":"urgency","weight":0.45,"patterns":["electricity.*(?:disconnect|cut off)","power connection.*(?:disconnect|cut off)","connection will be disconnected"]},
+    {"id":"prize_claim","label":"Makes an unsolicited lottery or prize claim","category":"financial","weight":0.65,"patterns":["lucky draw","claim your prize","won \\d","lottery","kbc"]},
+    {"id":"task_job_offer","label":"Offers easy money for online tasks","category":"financial","weight":0.65,"patterns":["part time job","earn (?:rs|inr|₹|\\d)","like (?:youtube )?videos","telegram group"]},
+    {"id":"investment_guarantee","label":"Promises guaranteed investment returns","category":"financial","weight":0.50,"patterns":["guaranteed (?:returns|profit)","double your money","vip stock group","\\d+% returns"]},
+    {"id":"loan_harassment","label":"Threatens to expose an overdue loan","category":"coercion","weight":0.50,"patterns":["message all your contacts","loan is overdue","contacts about your default"]},
+    {"id":"malicious_app","label":"Promotes a suspicious app or call-forwarding code","category":"link","weight":0.55,"patterns":["\\.apk\\b","\\*401\\*"]},
+    {"id":"shortened_link","label":"Contains a shortened link","category":"link","weight":0.30,"patterns":["https?://(?:bit\\.ly|tinyurl\\.com|t\\.co)/"]}
+  ],
+  "benignPatterns": [
+    "\\b(?:is|your) otp (?:for|to) .*\\bdo not share\\b",
+    "\\b(?:debited|credited) from a/c\\b",
+    "\\bavailable balance\\b",
+    "\\border has shipped\\b",
+    "\\btrack at amazon\\.in\\b"
+  ]
+}

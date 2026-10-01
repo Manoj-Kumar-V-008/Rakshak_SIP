@@ -1,0 +1,12 @@
+{"text":"482913 is your OTP for HDFC Bank NetBanking login. Do not share it with anyone.","expectLevel":"safe"}
+{"text":"Rs 1,250.00 debited from A/c XX4821 on 02-Oct-26 at AMAZON PAY. Available balance Rs 8,420.15.","expectLevel":"safe"}
+{"text":"I won't be late, thanks for your courtesy. Bringing the company's expansion plan, and we can learn the bill split later.","expectLevel":"safe"}
+{"text":"Your Amazon order has shipped and will arrive Oct 4. Track at amazon.in/track","expectLevel":"safe"}
+{"text":"This is Inspector Rao from CBI. A parcel in your name contains narcotics. You are under digital arrest. Stay on the video call, do not tell anyone, transfer Rs 50,000 for verification.","expectLevel":"danger","expectType":"digital_arrest"}
+{"text":"ALERT: your electricity power connection will be disconnected tonight at 9.30 PM. Call power officer at 9812345678 immediately.","expectLevel":"danger","expectType":"utility_disconnection"}
+{"text":"CONGRATULATIONS! You won 25,00,000 INR in KBC Lucky Draw. Contact manager Mr. Kumar at 9999123456 to claim.","expectLevel":"danger","expectType":"lottery_prize"}
+{"text":"Part time job! Earn Rs 5000 daily by liking YouTube videos. Join our Telegram group.","expectLevel":"danger","expectType":"fake_job"}
+{"text":"Join our VIP stock group — guaranteed 300% returns in 30 days, limited seats, UPI deposit required.","expectLevel":"danger","expectType":"investment_fraud"}
+{"text":"Your SBI rewards expire today! Install the app: http://bit.ly/sbi-rewards.apk","expectLevel":"danger","expectType":"malicious_app_or_hijack"}
+{"text":"Your instant loan is overdue. Pay now or we will message all your contacts about your default.","expectLevel":"danger","expectType":"loan_harassment"}
+{"text":"Hi, can you check this link http://tinyurl.com/x9s2 ?","expectLevel":"suspicious","expectType":"suspicious_link"}

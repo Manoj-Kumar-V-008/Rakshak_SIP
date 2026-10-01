@@ -1,4 +1,5 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
+import { AnalysisResult } from '../types/analysis';
 
 export type OnboardingStackParamList = {
   Welcome: undefined;
@@ -18,11 +19,7 @@ export type RootStackParamList = {
   Onboarding: NavigatorScreenParams<OnboardingStackParamList>;
   App: NavigatorScreenParams<AppTabParamList>;
   ScamAnalysisResult: {
-    scamText?: string;
-    riskScore: number;
-    scamType: string;
-    indicators: string[];
-    remediationSteps: string[];
+    result: AnalysisResult;
   };
   ScamDetails: {
     scamId: string;
