@@ -11,6 +11,7 @@ Open `http://127.0.0.1:8000/docs` for the interactive API contract. Run regressi
 
 ```powershell
 python -m pytest
+python -m ml.evaluate
 ```
 
 Rules are kept in `../shared/rules.json`; golden regression cases live in `../shared/golden_cases.jsonl`.

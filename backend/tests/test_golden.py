@@ -12,3 +12,9 @@ def test_golden_cases():
         assert result.level == case["expectLevel"], case["text"]
         if "expectType" in case:
             assert result.scamTypeId == case["expectType"], case["text"]
+
+
+def test_benign_credential_advice_does_not_trigger_a_credential_request():
+    result = analyze_text("Bank awareness notice: Never share your OTP, PIN, CVV, or password with anyone.")
+    assert result.level == "safe"
+    assert result.riskScore <= 20

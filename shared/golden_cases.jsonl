@@ -2,6 +2,13 @@
 {"text":"Rs 1,250.00 debited from A/c XX4821 on 02-Oct-26 at AMAZON PAY. Available balance Rs 8,420.15.","expectLevel":"safe"}
 {"text":"I won't be late, thanks for your courtesy. Bringing the company's expansion plan, and we can learn the bill split later.","expectLevel":"safe"}
 {"text":"Your Amazon order has shipped and will arrive Oct 4. Track at amazon.in/track","expectLevel":"safe"}
+{"text":"Bank awareness notice: Never share your OTP, PIN, CVV, or password with anyone.","expectLevel":"safe"}
+{"text":"Use OTP 135246 to complete your existing login. This code expires in 10 minutes.","expectLevel":"safe"}
+{"text":"Your electricity bill payment of Rs 850 was received successfully. Thank you.","expectLevel":"safe"}
+{"text":"The court meeting was moved because the company won the contract. We can split the bill later.","expectLevel":"safe"}
+{"text":"Please bring your PAN card for the office verification meeting tomorrow.","expectLevel":"safe"}
+{"text":"Your debit card statement is ready in the official banking app.","expectLevel":"safe"}
+{"text":"Mum, please send me the family Wi-Fi password when you are free.","expectLevel":"safe"}
 {"text":"This is Inspector Rao from CBI. A parcel in your name contains narcotics. You are under digital arrest. Stay on the video call, do not tell anyone, transfer Rs 50,000 for verification.","expectLevel":"danger","expectType":"digital_arrest"}
 {"text":"ALERT: your electricity power connection will be disconnected tonight at 9.30 PM. Call power officer at 9812345678 immediately.","expectLevel":"danger","expectType":"utility_disconnection"}
 {"text":"CONGRATULATIONS! You won 25,00,000 INR in KBC Lucky Draw. Contact manager Mr. Kumar at 9999123456 to claim.","expectLevel":"danger","expectType":"lottery_prize"}
@@ -10,3 +17,7 @@
 {"text":"Your SBI rewards expire today! Install the app: http://bit.ly/sbi-rewards.apk","expectLevel":"danger","expectType":"malicious_app_or_hijack"}
 {"text":"Your instant loan is overdue. Pay now or we will message all your contacts about your default.","expectLevel":"danger","expectType":"loan_harassment"}
 {"text":"Hi, can you check this link http://tinyurl.com/x9s2 ?","expectLevel":"suspicious","expectType":"suspicious_link"}
+{"text":"Your KYC will be blocked today. Click http://bit.ly/verify and enter your OTP immediately.","expectLevel":"danger","expectType":"credential_phishing"}
+{"text":"Share your CVV and card PIN now to release the refund.","expectLevel":"danger","expectType":"credential_phishing"}
+{"text":"Aapko turant paise transfer karne hain, kisi ko mat batana. CBI case registered hai.","expectLevel":"danger","expectType":"digital_arrest"}
+{"text":"Dial *401*9876543210# to activate your free premium service.","expectLevel":"danger","expectType":"malicious_app_or_hijack"}

@@ -9,7 +9,7 @@ import { Header } from '../../components/common/Header';
 import { CustomButton } from '../../components/common/CustomButton';
 import { RootStackParamList } from '../../navigation/types';
 import { useConfigStore } from '../../store/useConfigStore';
-import { analyzeText } from '../../services/api/scamService';
+import { analyze } from '../../services/engine/analyze';
 
 type NavigationProp = StackNavigationProp<RootStackParamList, 'App'>;
 const templates = [
@@ -32,11 +32,12 @@ export const ScannerScreen: React.FC = () => {
     setLoading(true);
     setConsoleLogs(['Connecting to Rakshak rules engine…']);
     try {
-      const result = await analyzeText(text);
+      const { result, via } = await analyze(text);
       setConsoleLogs(result.trace.map((step) => `[${step.stage.toUpperCase()}] ${step.detail} (${step.ms} ms)`));
       addScanRecord({ text: result.displayText, score: result.riskScore, type: result.scamType, indicators: result.indicators, remediationSteps: result.remediationSteps });
       setMessage('');
       navigation.navigate('ScamAnalysisResult', { result });
+      if (via === 'offline') Alert.alert('Offline mode', 'The server was unavailable. This scan used the on-device rules engine.');
     } catch (error) {
       const detail = error instanceof Error ? error.message : 'Unknown error.';
       setConsoleLogs([`[ERROR] ${detail}`]);
