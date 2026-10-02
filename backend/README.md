@@ -15,3 +15,5 @@ python -m ml.evaluate
 ```
 
 Rules are kept in `../shared/rules.json`; golden regression cases live in `../shared/golden_cases.jsonl`.
+
+For physical-phone setup and the rehearsal script, see `../docs/DEMO_CHECKLIST.md`.

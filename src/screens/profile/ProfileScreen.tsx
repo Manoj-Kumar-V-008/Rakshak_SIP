@@ -319,6 +319,17 @@ export const ProfileScreen: React.FC = () => {
         </Text>
 
         <View style={[styles.settingsGroup, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
+          <TouchableOpacity onPress={() => navigation.navigate('AdminSettings' as never)} style={styles.settingsItem}>
+            <Ionicons name="wifi-outline" size={20} color={theme.colors.secondary} style={styles.itemIcon} />
+            <View style={styles.itemTextContainer}>
+              <Text style={[styles.itemLabel, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>Demo Connection</Text>
+              <Text style={[styles.itemSubLabel, theme.fonts.caption, { color: theme.colors.textSecondary }]}>Backend URL, connection test, and offline mode</Text>
+            </View>
+            <MaterialCommunityIcons name="chevron-right" size={24} color={theme.colors.textMuted} />
+          </TouchableOpacity>
+
+          <View style={[styles.divider, { backgroundColor: theme.colors.outline }]} />
+
           <TouchableOpacity onPress={toggleDbView} style={styles.settingsItem}>
             <Ionicons name="code-working-outline" size={20} color={theme.colors.secondary} style={styles.itemIcon} />
             <View style={styles.itemTextContainer}>

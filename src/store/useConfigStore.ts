@@ -29,6 +29,8 @@ interface ConfigState {
   appVersion: string;
   isDarkMode: boolean;
   scansHistory: ScanRecord[];
+  backendUrl: string;
+  engineMode: 'auto' | 'offline';
   updateProfile: (profile: Partial<UserProfile>) => void;
   toggleTheme: () => void;
   completeOnboarding: (
@@ -41,6 +43,8 @@ interface ConfigState {
   ) => void;
   addScanRecord: (record: Omit<ScanRecord, 'id' | 'timestamp'>) => void;
   clearScanHistory: () => void;
+  setBackendUrl: (url: string) => void;
+  setEngineMode: (mode: 'auto' | 'offline') => void;
   resetConfig: () => void;
 }
 
@@ -63,6 +67,8 @@ export const useConfigStore = create<ConfigState>()(
       appVersion: '1.0.0',
       isDarkMode: true,
       scansHistory: [],
+      backendUrl: process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:8000',
+      engineMode: 'auto',
       
       updateProfile: (profileUpdates) =>
         set((state) => ({
@@ -99,12 +105,16 @@ export const useConfigStore = create<ConfigState>()(
         }),
         
       clearScanHistory: () => set({ scansHistory: [] }),
+      setBackendUrl: (backendUrl) => set({ backendUrl: backendUrl.trim().replace(/\/$/, '') }),
+      setEngineMode: (engineMode) => set({ engineMode }),
       
       resetConfig: () =>
         set({
           profile: initialProfile,
           isDarkMode: true,
           scansHistory: [],
+          backendUrl: process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:8000',
+          engineMode: 'auto',
         }),
     }),
     {

@@ -1,11 +1,13 @@
 import { AnalysisResult } from '../../types/analysis';
 import { analyzeText, ScamServiceError } from '../api/scamService';
 import { analyzeLocally } from './localEngine';
+import { useConfigStore } from '../../store/useConfigStore';
 
 export type AnalysisVia = 'server' | 'offline';
 export type AnalysisOutcome = { result: AnalysisResult; via: AnalysisVia };
 
 export const analyze = async (text: string): Promise<AnalysisOutcome> => {
+  if (useConfigStore.getState().engineMode === 'offline') return { result: analyzeLocally(text), via: 'offline' };
   try {
     return { result: await analyzeText(text), via: 'server' };
   } catch (error) {
