@@ -32,6 +32,9 @@ ios/
 backend/.venv/
 backend/__pycache__/
 backend/**/__pycache__/
+backend/data/*.db
+backend/ml/data/processed/
+backend/ml/artifacts/head.joblib
 .pytest_cache/
 
 # IDE / Editor config

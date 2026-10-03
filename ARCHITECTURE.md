@@ -10,7 +10,7 @@ This document serves as the master engineering blueprint and technical architect
 ### Project Metadata
 * **Project Name**: Rakshak AI (meaning "Protector" or "Guardian")
 * **Tagline**: *Your Intelligent Guardian Against Digital Fraud*
-* **Target OS Platform**: Android (Minimum SDK: 24, Target SDK: 34 via Expo SDK 51)
+* **Target OS Platform**: Android (Minimum SDK: 24, Target SDK: 34 via Expo SDK 57)
 * **Architecture Style**: Feature-Oriented Clean Architecture (Screaming Architecture)
 
 ### Brand Values
@@ -95,7 +95,7 @@ Dependencies are selected to guarantee scalability, type safety, fluid performan
 ### Core & Framework Packages
 * **`expo`** (~51.0.17): Modern React Native workflow engine, facilitating secure native modular updates without immediate native compilation issues.
 * **`expo-status-bar`** (~1.12.1): Fluid control of status bar appearance across dark/light screen modes.
-* **`react`** (18.2.0) & **`react-native`** (0.74.5): Underlying core framework versions.
+* **`react`** (19.2.3) & **`react-native`** (0.86.3): Underlying core framework versions.
 * **`expo-secure-store`** (~13.0.2): Standard device keychain encryption library, essential for securely saving future local API keys (Gemini / OpenAI), user settings, and private keys.
 * **`expo-file-system`** (~17.0.1): Full disk access library, utilized for local image cache management, offline TF-Lite model storage, and scanning logs.
 

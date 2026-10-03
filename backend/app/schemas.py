@@ -34,7 +34,8 @@ class SubScores(BaseModel):
 
 
 class Engine(BaseModel):
-    mode: Literal["rules-only"] = "rules-only"
+    mode: Literal["rules-only", "hybrid", "hybrid-llm"] = "rules-only"
+    model: str | None = None
     rulesVersion: str
     latencyMs: int = Field(ge=0)
 
@@ -61,3 +62,14 @@ class AnalysisResult(BaseModel):
     scores: dict[str, float | None]
     engine: Engine
     trace: list[TraceStep]
+    transcript: str | None = None
+
+
+class FeedbackRequest(BaseModel):
+    analysisId: str = Field(min_length=1, max_length=100)
+    verdict: Literal["scam_confirmed", "false_positive", "missed_scam"]
+    text: str | None = Field(default=None, max_length=1_000)
+
+
+class FeedbackResponse(BaseModel):
+    ok: bool

@@ -1,6 +1,7 @@
-import React from 'react';
-import { Alert, Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import React, { useState } from 'react';
+import { Alert, Linking, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from 'react-native-paper';
 import { AppTheme } from '../../theme';
@@ -8,6 +9,10 @@ import { Header } from '../../components/common/Header';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { CustomButton } from '../../components/common/CustomButton';
 import { AnalysisResult } from '../../types/analysis';
+import { sendFeedback } from '../../services/api/scamService';
+import { explainSimply } from '../../services/ai/geminiClient';
+import { RootStackParamList } from '../../navigation/types';
+import * as Speech from 'expo-speech';
 
 interface RouteParams { result: AnalysisResult; }
 type BadgeVariant = 'emerald' | 'amber' | 'coral';
@@ -38,8 +43,25 @@ const highlightedSegments = (text: string, result: AnalysisResult) => {
 export const ScamAnalysisResultScreen: React.FC = () => {
   const theme = useTheme() as AppTheme;
   const { result } = useRoute().params as RouteParams;
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const threat = levelDetails(result.level, theme);
   const metrics = [['Urgency', result.subScores.urgency], ['Impersonation', result.subScores.impersonation], ['Coercion', result.subScores.coercion], ['Financial ask', result.subScores.financialAsk]] as const;
+  const [feedbackBusy, setFeedbackBusy] = useState(false);
+  const [feedbackSent, setFeedbackSent] = useState<string | null>(null);
+  const [explaining, setExplaining] = useState(false);
+  const [explanation, setExplanation] = useState<string | null>(null);
+  const [speaking, setSpeaking] = useState(false);
+
+  const hearWarning = async () => {
+    if (speaking) {
+      Speech.stop();
+      setSpeaking(false);
+      return;
+    }
+    const script = `This message is rated ${threat.label}, risk ${result.riskScore} out of 100, ${result.scamType}. ${result.remediationSteps.join('. ')}`;
+    setSpeaking(true);
+    Speech.speak(script, { rate: 0.95, onDone: () => setSpeaking(false), onStopped: () => setSpeaking(false), onError: () => setSpeaking(false) });
+  };
 
   const callCybercrimeHelpline = async () => {
     try {
@@ -51,6 +73,59 @@ export const ScamAnalysisResultScreen: React.FC = () => {
     }
   };
 
+  const submitFeedback = async (verdict: 'scam_confirmed' | 'false_positive' | 'missed_scam') => {
+    if (result.analysisId.startsWith('offline-')) {
+      Alert.alert('Offline result', 'Connect to the backend and rescan before reporting - offline results have no server analysis ID.');
+      return;
+    }
+    setFeedbackBusy(true);
+    try {
+      await sendFeedback(result.analysisId, verdict, result.displayText);
+      setFeedbackSent(verdict === 'scam_confirmed' ? 'Thanks - reported as scam and saved on the server.' : 'Thanks - marked as safe and saved on the server.');
+    } catch (error) {
+      Alert.alert('Report not saved', error instanceof Error ? error.message : 'Please try again.');
+    } finally { setFeedbackBusy(false); }
+  };
+
+  const shareWarning = async () => {
+    try {
+      await Share.share({ message: `Rakshak AI flagged this as ${threat.label} (${result.scamType}, score ${result.riskScore}/100):\n${result.displayText}` });
+    } catch (error) {
+      Alert.alert('Unable to share', error instanceof Error ? error.message : 'Please try again.');
+    }
+  };
+
+  const handleExplain = async () => {
+    Alert.alert(
+      'Send to Gemini?',
+      'This sends the scanned text to Google Gemini for a simple explanation. Only continue if you consent.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Explain',
+          onPress: async () => {
+            setExplaining(true);
+            setExplanation(null);
+            try {
+              const text = await explainSimply(result.displayText, result.scamType, result.riskScore, result.indicators);
+              setExplanation(text);
+            } catch (error) {
+              const detail = error instanceof Error ? error.message : 'Please try again.';
+              if (detail.includes('No Gemini key')) {
+                Alert.alert('Gemini key needed', 'Save a Gemini API key in Demo Connection first. The explainer stays off until then.', [
+                  { text: 'Open settings', onPress: () => navigation.navigate('AdminSettings') },
+                  { text: 'Cancel', style: 'cancel' },
+                ]);
+              } else {
+                Alert.alert('Explainer unavailable', detail);
+              }
+            } finally { setExplaining(false); }
+          },
+        },
+      ]
+    );
+  };
+
   return <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
     <Header title="Analysis Result" showBack />
     <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -59,7 +134,7 @@ export const ScamAnalysisResultScreen: React.FC = () => {
         <View style={[styles.dialOuterCircle, { borderColor: theme.colors.outline }]}><View style={[styles.dialInnerCircle, { borderColor: threat.color }]}><Text style={[styles.scoreValue, theme.fonts.display, { color: threat.color }]}>{result.riskScore}</Text><Text style={[styles.scoreScale, theme.fonts.caption, { color: theme.colors.textMuted }]}>out of 100</Text></View></View>
         <View style={styles.badgeRow}><StatusBadge label={threat.label} variant={threat.variant} /><Text style={[styles.scamTitle, theme.fonts.h3, { color: theme.colors.textPrimary }]}>{result.scamType}</Text></View>
         <Text style={[styles.threatDescription, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>{threat.description}</Text>
-        <Text style={[styles.engineDetail, theme.fonts.caption, { color: theme.colors.textMuted }]}>{result.engine.mode === 'offline-rules' ? 'Offline · rules on device' : 'Server · rules engine'} · {result.engine.latencyMs} ms · rules v{result.engine.rulesVersion}</Text>
+        <Text style={[styles.engineDetail, theme.fonts.caption, { color: theme.colors.textMuted }]}>{result.engine.mode === 'offline-rules' ? 'Offline · rules on device' : result.engine.mode === 'hybrid-llm' ? `Server · AI hybrid (${result.engine.model ?? 'llm'})` : result.engine.mode === 'hybrid' ? `Server · hybrid (${result.engine.model ?? 'e5-small'})` : 'Server · rules engine'} · {result.engine.latencyMs} ms · rules v{result.engine.rulesVersion}</Text>
       </View>
 
       <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary }]}>Rule sub-scores</Text>
@@ -67,6 +142,7 @@ export const ScamAnalysisResultScreen: React.FC = () => {
 
       <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary }]}>Scanned message</Text>
       <View style={[styles.messageBox, { backgroundColor: theme.colors.surfaceContainer }]}><Text style={[styles.messageText, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>{highlightedSegments(result.displayText, result).map((segment) => <Text key={segment.key} style={segment.flagged ? [styles.highlight, { color: threat.color, backgroundColor: `${threat.color}2B` }] : undefined}>{segment.text}</Text>)}</Text></View>
+      {result.transcript ? <View style={[styles.messageBox, { backgroundColor: theme.colors.surface }]}><Text style={[theme.fonts.caption, { color: theme.colors.textSecondary, marginBottom: 4 }]}>VOICE TRANSCRIPT</Text><Text style={[styles.messageText, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>{result.transcript}</Text></View> : null}
 
       <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary }]}>Evidence found</Text>
       <View style={styles.listContainer}>{result.indicators.map((indicator) => <View key={indicator} style={styles.listItem}><MaterialCommunityIcons name="alert-circle-outline" size={16} color={threat.color} style={styles.listIcon} /><Text style={[styles.listItemText, theme.fonts.bodyMedium, { color: theme.colors.textSecondary }]}>{indicator}</Text></View>)}</View>
@@ -74,6 +150,15 @@ export const ScamAnalysisResultScreen: React.FC = () => {
       <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary }]}>What to do</Text>
       <View style={styles.listContainer}>{result.remediationSteps.map((step) => <View key={step} style={styles.listItem}><MaterialCommunityIcons name="shield-outline" size={16} color={theme.colors.safe} style={styles.listIcon} /><Text style={[styles.listItemText, theme.fonts.bodyMedium, { color: theme.colors.textSecondary }]}>{step}</Text></View>)}</View>
       {result.level !== 'safe' && <CustomButton title="Call Cybercrime Helpline · 1930" onPress={callCybercrimeHelpline} variant="danger" style={styles.helplineButton} />}
+      <CustomButton title="Report as scam" onPress={() => submitFeedback('scam_confirmed')} variant="primary" loading={feedbackBusy} disabled={feedbackBusy} style={styles.helplineButton} />
+      <CustomButton title="Mark as safe" onPress={() => submitFeedback('false_positive')} variant="outline" loading={feedbackBusy} disabled={feedbackBusy} style={styles.helplineButton} />
+      <CustomButton title="Share warning" onPress={shareWarning} variant="secondary" style={styles.helplineButton} />
+      <CustomButton title={speaking ? 'Stop spoken warning' : 'Hear warning aloud'} onPress={hearWarning} variant="outline" style={styles.helplineButton} />
+      {feedbackSent && <Text style={[theme.fonts.bodySmall, { color: theme.colors.safe, marginTop: 8, textAlign: 'center' }]}>{feedbackSent}</Text>}
+      <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary }]}>Simple explanation (opt-in)</Text>
+      <Text style={[theme.fonts.bodySmall, { color: theme.colors.textSecondary, marginBottom: 8 }]}>Off by default. Sends this text to Google Gemini only when you tap Explain.</Text>
+      <CustomButton title="Explain in simple words" onPress={handleExplain} variant="outline" loading={explaining} disabled={explaining} style={styles.helplineButton} />
+      {explanation && <View style={[styles.messageBox, { backgroundColor: theme.colors.surface }]}><Text style={[styles.messageText, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>{explanation}</Text></View>}
     </ScrollView>
   </View>;
 };

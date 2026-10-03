@@ -14,6 +14,7 @@ import { ScannerScreen } from '../screens/scanner/ScannerScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { ScamAnalysisResultScreen } from '../screens/analysis/ScamAnalysisResultScreen';
 import { AdminSettingsScreen } from '../screens/settings/AdminSettingsScreen';
+import { VoiceScannerScreen } from '../screens/scanner/VoiceScannerScreen';
 
 // --- SKELETON KNOWLEDGE TAB ---
 const KnowledgePlaceholder = () => (
@@ -120,6 +121,7 @@ export const NavigationRouter = () => {
       <RootStack.Screen name="Onboarding" component={OnboardingNavigator} />
       <RootStack.Screen name="App" component={AppNavigator} />
       <RootStack.Screen name="ScamAnalysisResult" component={ScamAnalysisResultScreen} />
+      <RootStack.Screen name="VoiceScanner" component={VoiceScannerScreen} />
       <RootStack.Screen name="AdminSettings" component={AdminSettingsScreen} />
     </RootStack.Navigator>
   );

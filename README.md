@@ -1,7 +1,7 @@
 # 🛡️ Rakshak AI
 > **Your Intelligent Guardian Against Digital Fraud**
 
-[![React Native](https://img.shields.io/badge/React_Native-0.81-blue.svg?style=flat&logo=react)](https://reactnative.dev/)
+[![React Native](https://img.shields.io/badge/React_Native-0.86-blue.svg?style=flat&logo=react)](https://reactnative.dev/)
 [![Expo SDK](https://img.shields.io/badge/Expo-SDK_54-black.svg?style=flat&logo=expo)](https://expo.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg?style=flat&logo=typescript)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-Academic_Research-green.svg)](#)
@@ -23,12 +23,13 @@ With the rapid acceleration of digital transactions and UPI in India, cyber crim
 
 ## ✨ Key Features
 
-- 🔒 **Privacy-First On-Device Processing**: Analyzes message structures locally on the device CPU without cloud data exfiltration.
-- ⚡ **Real-Time Threat Classifier**: Rapid heuristics and semantic vector checks evaluating urgency, fear coercion, impersonation, and unverified callback sources.
-- 📊 **Dynamic Risk Scoring**: Categorizes messages into Safe, Caution, or High Danger tiers with explicit remediation advice.
-- 🗄️ **Local SQLite Database Inspector**: An interactive Developer Tools console enabling full inspection of schema, profile configurations, and scanned threat history records.
-- 🚨 **Emergency SOS Protection**: Immediate one-tap dialing for the National Cyber Crime Helpline (**1930**) and bank card blocking protocols.
-- 🌐 **Multilingual Support**: Tailored for regional languages (English, Hindi, Tamil, Telugu, Kannada).
+- 🔒 **Privacy-First Rules Engine**: Text leaves the phone only to your own laptop server for analysis, and only when you scan. Offline rules run fully on-device when the server is unreachable.
+- ⚡ **Real-Time Threat Classifier**: Explainable rules (urgency, impersonation, coercion, financial ask, links) with highlighted evidence and sub-scores. No fabricated ML percentages.
+- 🎙️ **Voice Clip Analysis**: Record or pick a call clip → Whisper transcript on the server → same rules pipeline. Requires the server voice model (503 when not downloaded).
+- 📊 **Dynamic Risk Scoring**: Categorizes messages into Safe, Suspicious, or Danger tiers with explicit remediation advice.
+- 🗄️ **Feedback Storage**: Report as scam / Mark as safe saves to server SQLite (`POST /v1/feedback`). Message text is stored only on explicit report.
+- 🚨 **Emergency SOS Protection**: Immediate one-tap dialing for the National Cyber Crime Helpline (**1930**).
+- 🌐 **Languages Tested**: English, Hindi, Hinglish tested on the 23-case regression set. Kannada experimental. Tamil/Telugu not claimed in this build.
 
 ---
 
@@ -36,7 +37,7 @@ With the rapid acceleration of digital transactions and UPI in India, cyber crim
 
 | Layer | Technology |
 |---|---|
-| **Mobile Framework** | React Native (Expo SDK 54) |
+| **Mobile Framework** | React Native (Expo SDK 57) |
 | **Language** | TypeScript |
 | **State Management** | Zustand (with persistent AsyncStorage storage) |
 | **Design System** | React Native Paper (MD3), React Native Reanimated |

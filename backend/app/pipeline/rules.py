@@ -58,11 +58,8 @@ def _type_for(signals: list[Signal]) -> str:
     return best_type
 
 
-def analyze_text(text: str) -> AnalysisResult:
-    import time
-
-    started = time.perf_counter()
-    normalized = normalize_text(text)
+def rule_signals(normalized: str) -> tuple[list[Signal], bool, float]:
+    """Shared rule matching used by the runner and evaluators. Returns (signals, benign, p_rules)."""
     signals: list[Signal] = []
     for definition in RULES["signals"]:
         found: list[Match] = []
@@ -70,27 +67,15 @@ def analyze_text(text: str) -> AnalysisResult:
             found.extend(_matches(pattern, normalized))
         if found:
             signals.append(Signal(id=definition["id"], label=definition["label"], category=definition["category"], weight=definition["weight"], matches=found))
-
     benign = any(re.search(pattern, normalized, re.IGNORECASE) for pattern in RULES["benignPatterns"])
-    score = _risk(signals)
+    probability = 0.0 if not signals else float(1 - math.prod(1 - signal.weight for signal in signals))
     if benign:
-        score = min(score, 10)
-        signals = []
-    type_id = _type_for(signals)
-    if score <= 20:
-        level = "safe"
-    elif score <= 60:
-        level = "suspicious"
-    else:
-        level = "danger"
-    categories = {category: sum(signal.weight for signal in signals if signal.category == category) for category in {"urgency", "impersonation", "coercion", "financial"}}
-    details = TYPE_DETAILS[type_id]
-    elapsed = round((time.perf_counter() - started) * 1000)
-    indicator_labels = [signal.label for signal in signals] or (["Recognised as a legitimate transactional or OTP message"] if benign else ["No strong known scam pattern found"])
-    return AnalysisResult(
-        displayText=normalized, riskScore=score, level=level, scamTypeId=type_id, scamType=details[0],
-        indicators=indicator_labels, remediationSteps=details[1], subScores=SubScores(**{key: min(100, round(value * 100)) for key, value in categories.items()}, financialAsk=min(100, round(categories["financial"] * 100))),
-        signals=signals, entities=extract_entities(normalized), detectedLanguage=detect_language(normalized),
-        scores={"rules": score / 100, "semantic": None, "fused": score / 100}, engine=Engine(rulesVersion=RULES["version"], latencyMs=elapsed),
-        trace=[TraceStep(stage="normalize", ms=0, detail=f"{len(normalized)} chars, lang={detect_language(normalized)}"), TraceStep(stage="rules", ms=elapsed, detail=f"{len(signals)} signals; rules score {score}")],
-    )
+        return [], True, probability
+    return signals, False, probability
+
+
+def analyze_text(text: str) -> AnalysisResult:
+    # Thin wrapper so existing imports keep working; real orchestration lives in runner.py.
+    from app.pipeline.runner import run_pipeline
+
+    return run_pipeline(text)

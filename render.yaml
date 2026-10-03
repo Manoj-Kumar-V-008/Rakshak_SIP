@@ -1,0 +1,23 @@
+# Render one-click deploy for the Rakshak AI FastAPI backend.
+# Dashboard: New -> Web Service -> select this repo -> Render reads this file.
+# Then set RAKSHAK_LLM_API_KEY in the dashboard (kept secret, never committed).
+# Light image on purpose: faster-whisper/torch stay commented out in
+# backend/requirements.txt; transcription + scoring run through Gemini cloud.
+
+services:
+  - type: web
+    name: rakshak-ai-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    envVars:
+      - key: RAKSHAK_LLM_PROVIDER
+        value: gemini
+      - key: RAKSHAK_LLM_MODEL
+        value: gemini-3.5-flash-lite
+      - key: RAKSHAK_TRANSCRIBE_MODEL
+        value: gemini-3.5-flash-lite
+      - key: RAKSHAK_LLM_API_KEY
+        sync: false

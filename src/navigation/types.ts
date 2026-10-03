@@ -21,6 +21,7 @@ export type RootStackParamList = {
   ScamAnalysisResult: {
     result: AnalysisResult;
   };
+  VoiceScanner: undefined;
   ScamDetails: {
     scamId: string;
     title: string;

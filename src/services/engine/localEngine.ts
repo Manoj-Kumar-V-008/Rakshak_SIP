@@ -1,8 +1,24 @@
-import rules from '../../../shared/rules.json';
+import bundledRules from '../../../shared/rules.json';
 import { AnalysisResult } from '../../types/analysis';
 
-type RuleSignal = (typeof rules.signals)[number];
+type BundledRules = typeof bundledRules;
+export type ActiveRules = BundledRules;
+type RuleSignal = ActiveRules['signals'][number];
 type Category = 'urgency' | 'impersonation' | 'coercion' | 'financial' | 'link';
+
+let activeRules: ActiveRules = bundledRules;
+
+export const setRemoteRules = (remote: unknown): string => {
+  const candidate = remote as Partial<ActiveRules>;
+  if (!candidate || typeof candidate.version !== 'string' || !Array.isArray(candidate.signals) || !Array.isArray(candidate.benignPatterns)) {
+    throw new Error('Server returned invalid rules.');
+  }
+  activeRules = candidate as ActiveRules;
+  return activeRules.version;
+};
+
+export const getRulesVersion = (): string => activeRules.version;
+export const isUsingRemoteRules = (): boolean => activeRules !== bundledRules;
 
 const typeDetails: Record<string, { name: string; steps: string[] }> = {
   digital_arrest: { name: 'Digital Arrest Scam', steps: ['Disconnect immediately; real police do not investigate over a video call.', 'Call 1930 to report the attempt.'] },
@@ -51,6 +67,7 @@ const typeFor = (signals: Array<{ id: string; weight: number }>) => {
 export const analyzeLocally = (input: string): AnalysisResult => {
   const started = Date.now();
   const displayText = normalize(input);
+  const rules = activeRules;
   let signals = rules.signals.flatMap((definition: RuleSignal) => {
     const matches = definition.patterns.flatMap((pattern) => matchesFor(pattern, displayText));
     return matches.length ? [{ id: definition.id, label: definition.label, category: definition.category as Category, weight: definition.weight, matches }] : [];

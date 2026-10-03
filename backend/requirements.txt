@@ -1,5 +1,14 @@
 fastapi>=0.115,<1
 uvicorn[standard]>=0.30,<1
 pydantic>=2.7,<3
+python-multipart>=0.0.9,<1
 pytest>=8,<9
 httpx>=0.27,<1
+# P1 voice: install to enable /v1/analyze/audio (CPU, ~500MB first download)
+# faster-whisper>=1.0,<2
+# P1 semantic: uncomment to enable e5-small + head (CPU, ~400MB model + torch)
+# torch --index-url https://download.pytorch.org/whl/cpu
+# sentence-transformers>=3.0,<4
+# scikit-learn>=1.4,<2
+# joblib>=1.4,<2
+# numpy>=1.26,<3

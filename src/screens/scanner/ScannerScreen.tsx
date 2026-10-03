@@ -10,6 +10,7 @@ import { CustomButton } from '../../components/common/CustomButton';
 import { RootStackParamList } from '../../navigation/types';
 import { useConfigStore } from '../../store/useConfigStore';
 import { analyze } from '../../services/engine/analyze';
+import { useRemoteRules } from '../../hooks/useRemoteRules';
 
 type NavigationProp = StackNavigationProp<RootStackParamList, 'App'>;
 const templates = [
@@ -21,6 +22,7 @@ const templates = [
 export const ScannerScreen: React.FC = () => {
   const theme = useTheme() as AppTheme;
   const navigation = useNavigation<NavigationProp>();
+  useRemoteRules();
   const addScanRecord = useConfigStore((state) => state.addScanRecord);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -57,6 +59,7 @@ export const ScannerScreen: React.FC = () => {
         </View>
         {(loading || consoleLogs.length > 0) && <View style={styles.consoleViewer}><View style={styles.consoleHeader}>{loading && <ActivityIndicator size="small" color={theme.colors.primary} style={styles.spinner} />}<Text style={styles.consoleHeaderTitle}>RAKSHAK_ENGINE_TRACE</Text></View>{consoleLogs.map((log) => <Text key={log} style={[styles.logLine, { color: theme.colors.safe }]}>{log}</Text>)}</View>}
         <CustomButton title={loading ? 'Analyzing…' : 'Analyze Message'} onPress={handleAnalyze} variant="primary" disabled={loading || message.trim().length < 5} style={styles.ctaButton} />
+        <CustomButton title="Scan voice clip instead" onPress={() => navigation.navigate('VoiceScanner')} variant="outline" disabled={loading} style={styles.ctaButton} />
         <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary, marginTop: 24 }]}>Sample messages</Text>
         <View style={styles.templatesGroup}>{templates.map((template) => <TouchableOpacity key={template.label} onPress={() => setMessage(template.text)} style={[styles.templateCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]} disabled={loading}><Text style={[styles.templateLabel, theme.fonts.bodyLarge, { color: theme.colors.primary }]}>{template.label}</Text><Text numberOfLines={2} style={[styles.templatePreview, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>{template.text}</Text></TouchableOpacity>)}</View>
       </ScrollView>
