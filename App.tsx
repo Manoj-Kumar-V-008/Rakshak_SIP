@@ -1,4 +1,5 @@
 import React from 'react';
+import { LogBox } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { PaperProvider } from 'react-native-paper';
@@ -7,6 +8,9 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useConfigStore } from './src/store/useConfigStore';
 import { lightTheme, darkTheme } from './src/theme';
 import { NavigationRouter } from './src/navigation';
+
+// Dev-only noise from @react-navigation/stack v6 on new RN. Harmless; hidden for clean demos.
+LogBox.ignoreLogs(['InteractionManager has been deprecated']);
 
 export default function App() {
   const isDarkMode = useConfigStore((state) => state.isDarkMode);
