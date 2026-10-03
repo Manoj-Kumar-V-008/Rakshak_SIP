@@ -1,10 +1,11 @@
 import React from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert, Platform, ImageBackground } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert, Linking, Platform, ImageBackground } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { AppTheme } from '../../theme';
 import { Header } from '../../components/common/Header';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { useConfigStore } from '../../store/useConfigStore';
+import { getRulesVersion, isUsingRemoteRules } from '../../services/engine/localEngine';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -13,16 +14,20 @@ export const DashboardScreen: React.FC = () => {
   const navigation = useNavigation();
   const profile = useConfigStore((state) => state.profile);
   const scansHistory = useConfigStore((state) => state.scansHistory);
+  const engineMode = useConfigStore((state) => state.engineMode);
+  const backendUrl = useConfigStore((state) => state.backendUrl);
+  const highRisk = scansHistory.filter((s) => s.score > 60).length;
+  const safeCount = scansHistory.filter((s) => s.score <= 20).length;
+  const suspiciousCount = scansHistory.filter((s) => s.score > 20 && s.score <= 60).length;
 
-  const handleSOS = () => {
-    Alert.alert(
-      'Emergency SOS Protection',
-      'If you have been scammed or are facing an ongoing threat:\n\n1. Dial 1930 immediately (National Cyber Crime Helpline).\n2. Block your bank cards.\n3. Do not share any OTPs.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Call Helpline (1930)', onPress: () => Alert.alert('Dialing Helpline', 'Calling 1930...') },
-      ]
-    );
+  const handleSOS = async () => {
+    try {
+      const telUrl = 'tel:1930';
+      if (!(await Linking.canOpenURL(telUrl))) throw new Error('Calling is not supported on this device.');
+      await Linking.openURL(telUrl);
+    } catch (error) {
+      Alert.alert('Dial 1930', error instanceof Error ? error.message : 'Please dial 1930 manually.');
+    }
   };
 
   const handleQuickAction = (actionType: string) => {
@@ -108,9 +113,9 @@ export const DashboardScreen: React.FC = () => {
             </View>
           </TouchableOpacity>
           <Text style={[styles.statusBrief, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>
-            {scansHistory.length === 0 
-              ? 'Your on-device NLP model is actively analyzing SMS patterns. No security anomalies detected.'
-              : `Scanned ${scansHistory.length} messages. Local database is fully synchronized.`}
+            {scansHistory.length === 0
+              ? 'No scans yet. Paste a message in Scan, or analyze a call clip in Voice.'
+              : `Scanned ${scansHistory.length} messages · ${highRisk} high-risk. Tap the dial to scan another.`}
           </Text>
         </View>
 
@@ -121,71 +126,71 @@ export const DashboardScreen: React.FC = () => {
             <Text style={[styles.assistantTitle, theme.fonts.labelLarge, { color: theme.colors.textPrimary }]}>
               Sentinel AI Assistant
             </Text>
-            <StatusBadge label="Local Model" variant="info" style={{ marginLeft: 'auto' }} />
+            <StatusBadge label="Rules + AI" variant="info" style={{ marginLeft: 'auto' }} />
           </View>
           <Text style={[styles.assistantText, theme.fonts.bodyMedium, { color: theme.colors.textSecondary }]}>
-            "Hello {profile.name}! I process all message notifications directly on your CPU. I am currently monitoring for fear-based phishing tactics and fake bank collection links."
+            {`Namaste ${profile.name || 'friend'}! Paste any suspicious message in Scan, or bring a call clip to Voice Scanner. I check it against scam patterns and explain the risk in simple words.`}
           </Text>
         </View>
 
-        {/* Real-time AI Diagnostics Panel (WOW Factor for Presentation) */}
+        {/* Real status panel (no simulated model stats) */}
         <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary }]}>
-          AI Engine Diagnostics
+          Protection Status
         </Text>
         <View style={[styles.diagnosticsCard, { backgroundColor: '#020617', borderColor: theme.colors.outline }]}>
           <View style={styles.consoleHeader}>
             <Text style={[styles.consoleTitle, theme.fonts.caption, { color: theme.colors.secondary }]}>
-              ACTIVE_SENTINEL_DIAGNOSTICS
+              RAKSHAK_STATUS
             </Text>
           </View>
-          
+
           <View style={styles.diagnosticLine}>
-            <Text style={styles.consoleLabel}>MODEL_ARCH :</Text>
-            <Text style={styles.consoleVal}>quantized_Mobile-BERT_v1.0</Text>
+            <Text style={styles.consoleLabel}>ENGINE :</Text>
+            <Text style={styles.consoleVal}>{engineMode === 'offline' ? 'offline rules only' : 'auto (server, offline fallback)'}</Text>
           </View>
           <View style={styles.diagnosticLine}>
-            <Text style={styles.consoleLabel}>ACTIVE_RULES :</Text>
-            <Text style={styles.consoleVal}>2,450 Heuristics Loaded</Text>
+            <Text style={styles.consoleLabel}>OFFLINE_RULES :</Text>
+            <Text style={styles.consoleVal}>v{getRulesVersion()}{isUsingRemoteRules() ? ' (remote)' : ' (bundled)'}</Text>
           </View>
           <View style={styles.diagnosticLine}>
-            <Text style={styles.consoleLabel}>NLP_STATE :</Text>
-            <Text style={[styles.consoleVal, { color: theme.colors.safe }]}>STANDBY (LISTENING)</Text>
+            <Text style={styles.consoleLabel}>SCANS :</Text>
+            <Text style={[styles.consoleVal, { color: highRisk > 0 ? theme.colors.danger : theme.colors.safe }]}>{scansHistory.length} total · {highRisk} high-risk</Text>
           </View>
           <View style={styles.diagnosticLine}>
-            <Text style={styles.consoleLabel}>DB_STATUS :</Text>
-            <Text style={[styles.consoleVal, { color: theme.colors.safe }]}>SQLITE_LOCAL_SYNC_OK</Text>
+            <Text style={styles.consoleLabel}>SERVER :</Text>
+            <Text style={styles.consoleVal} numberOfLines={1}>{backendUrl}</Text>
           </View>
         </View>
 
-        {/* AI Threat confidence meters (Visual chart effect) */}
+        {/* Your scan mix (real counts from history) */}
         <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary, marginTop: 12 }]}>
-          AI Vector Confidence Levels
+          Your Scan Mix
         </Text>
+        {scansHistory.length === 0 ? (
+          <View style={[styles.chartCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
+            <Text style={[theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>Scan a message to build your mix.</Text>
+          </View>
+        ) : (
         <View style={[styles.chartCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
-          <View style={styles.chartItem}>
+          {[
+            { label: 'Safe scans', count: safeCount, color: theme.colors.safe },
+            { label: 'Suspicious scans', count: suspiciousCount, color: theme.colors.warning },
+            { label: 'Danger scans', count: highRisk, color: theme.colors.danger },
+          ].map((row) => (
+          <View key={row.label} style={styles.chartItem}>
             <View style={styles.chartLabelRow}>
               <Text style={[styles.chartLabel, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>
-                SMS NLP Classifier
+                {row.label}
               </Text>
-              <Text style={[styles.chartPercent, theme.fonts.caption, { color: theme.colors.primary }]}>92%</Text>
+              <Text style={[styles.chartPercent, theme.fonts.caption, { color: row.color }]}>{row.count}</Text>
             </View>
             <View style={[styles.progressBarBg, { backgroundColor: theme.colors.surfaceContainer }]}>
-              <View style={[styles.progressBarFill, { backgroundColor: theme.colors.primary, width: '92%' }]} />
+              <View style={[styles.progressBarFill, { backgroundColor: row.color, width: `${Math.round((row.count / scansHistory.length) * 100)}%` }]} />
             </View>
           </View>
-
-          <View style={styles.chartItem}>
-            <View style={styles.chartLabelRow}>
-              <Text style={[styles.chartLabel, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>
-                URL Phishing Scanner
-              </Text>
-              <Text style={[styles.chartPercent, theme.fonts.caption, { color: theme.colors.secondary }]}>70%</Text>
-            </View>
-            <View style={[styles.progressBarBg, { backgroundColor: theme.colors.surfaceContainer }]}>
-              <View style={[styles.progressBarFill, { backgroundColor: theme.colors.secondary, width: '70%' }]} />
-            </View>
-          </View>
+          ))}
         </View>
+        )}
 
         {/* Scans Database History (PHYSICAL DB LIST VERIFICATION) */}
         <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary, marginTop: 16 }]}>
@@ -227,26 +232,26 @@ export const DashboardScreen: React.FC = () => {
           </View>
         )}
 
-        {/* Active AI Core Engine Modules */}
+        {/* Scanner entry points */}
         <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary, marginTop: 16 }]}>
-          Active AI Guard Engines
+          Scan With
         </Text>
         <View style={styles.engineGrid}>
-          <View style={[styles.engineTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
+          <TouchableOpacity onPress={() => handleQuickAction('scan')} style={[styles.engineTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
             <MaterialCommunityIcons name="message-processing-outline" size={24} color={theme.colors.primary} />
             <Text style={[styles.engineLabel, theme.fonts.labelSmall, { color: theme.colors.textPrimary }]}>
-              SMS NLP Parser
+              Text Scanner
             </Text>
-            <Text style={[styles.engineStatus, { color: theme.colors.safe }]}>● running</Text>
-          </View>
+            <Text style={[styles.engineStatus, { color: theme.colors.safe }]}>● ready</Text>
+          </TouchableOpacity>
 
-          <View style={[styles.engineTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
-            <MaterialCommunityIcons name="link-variant-off" size={24} color={theme.colors.secondary} />
+          <TouchableOpacity onPress={() => (navigation.getParent() as unknown as { navigate: (name: string) => void })?.navigate('VoiceScanner')} style={[styles.engineTile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
+            <MaterialCommunityIcons name="microphone-outline" size={24} color={theme.colors.secondary} />
             <Text style={[styles.engineLabel, theme.fonts.labelSmall, { color: theme.colors.textPrimary }]}>
-              URL Anti-Phish
+              Voice Scanner
             </Text>
-            <Text style={[styles.engineStatus, { color: theme.colors.safe }]}>● running</Text>
-          </View>
+            <Text style={[styles.engineStatus, { color: theme.colors.safe }]}>● ready</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Live Scam Warnings */}

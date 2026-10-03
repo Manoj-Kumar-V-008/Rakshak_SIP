@@ -1,5 +1,4 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTheme } from 'react-native-paper';
@@ -15,15 +14,7 @@ import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { ScamAnalysisResultScreen } from '../screens/analysis/ScamAnalysisResultScreen';
 import { AdminSettingsScreen } from '../screens/settings/AdminSettingsScreen';
 import { VoiceScannerScreen } from '../screens/scanner/VoiceScannerScreen';
-
-// --- SKELETON KNOWLEDGE TAB ---
-const KnowledgePlaceholder = () => (
-  <View style={[styles.placeholder, { backgroundColor: '#0B0F19' }]}>
-    <Ionicons name="book-outline" size={48} color="#3F8CFF" />
-    <Text style={[styles.placeholderText, { color: '#F8FAFC', marginTop: 12 }]}>Scam Knowledge Hub</Text>
-    <Text style={[styles.placeholderSub, { color: '#94A3B8', marginTop: 6 }]}>Categories and prevention quizzes coming in Phase C.</Text>
-  </View>
-);
+import { LearnScreen } from '../screens/education/LearnScreen';
 
 // --- NAVIGATOR CREATIONS ---
 const RootStack = createStackNavigator<RootStackParamList>();
@@ -92,9 +83,9 @@ const AppNavigator = () => {
         component={ScannerScreen} 
         options={{ tabBarLabel: 'Scan' }}
       />
-      <AppTabs.Screen 
-        name="KnowledgeTab" 
-        component={KnowledgePlaceholder} 
+      <AppTabs.Screen
+        name="KnowledgeTab"
+        component={LearnScreen}
         options={{ tabBarLabel: 'Learn' }}
       />
       <AppTabs.Screen 
@@ -127,23 +118,4 @@ export const NavigationRouter = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  placeholder: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  placeholderText: {
-    fontSize: 18,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  placeholderSub: {
-    fontSize: 14,
-    textAlign: 'center',
-    lineHeight: 20,
-    paddingHorizontal: 16,
-  },
-});
 export default NavigationRouter;

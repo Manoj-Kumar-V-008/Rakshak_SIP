@@ -109,7 +109,7 @@ export const OnboardingScreenTwo: React.FC = () => {
           />
         </View>
         <Text style={[styles.cardText, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>
-          Scans incoming SMS texts in real-time to alert you of UPI, OTP, and lottery fraud messages.
+          Paste suspicious texts or analyze call clips to catch UPI, OTP, and lottery frauds.
         </Text>
       </TouchableOpacity>
 
