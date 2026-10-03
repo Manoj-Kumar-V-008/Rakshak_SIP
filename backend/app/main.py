@@ -27,6 +27,11 @@ app.include_router(feedback_router)
 app.include_router(audio_router)
 
 
+@app.get("/")
+def root() -> dict[str, object]:
+    return {"service": "Rakshak AI API", "docs": "/docs", "health": "/health"}
+
+
 @app.get("/health")
 def health() -> dict[str, object]:
     from app.pipeline import llm as llm_mod

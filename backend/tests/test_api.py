@@ -12,6 +12,12 @@ def test_health():
     assert response.json()["status"] == "ok"
 
 
+def test_root_links_docs():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert response.json()["docs"] == "/docs"
+
+
 def test_analysis_has_explainable_contract():
     response = client.post("/v1/analyze/text", json={"text": "Call me immediately and share your OTP."})
     assert response.status_code == 200
