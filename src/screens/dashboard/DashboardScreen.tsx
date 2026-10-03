@@ -6,6 +6,7 @@ import { Header } from '../../components/common/Header';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { useConfigStore } from '../../store/useConfigStore';
 import { getRulesVersion, isUsingRemoteRules } from '../../services/engine/localEngine';
+import { callCybercrimeHelpline } from '../../utils/callHelpline';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -20,15 +21,7 @@ export const DashboardScreen: React.FC = () => {
   const safeCount = scansHistory.filter((s) => s.score <= 20).length;
   const suspiciousCount = scansHistory.filter((s) => s.score > 20 && s.score <= 60).length;
 
-  const handleSOS = async () => {
-    try {
-      const telUrl = 'tel:1930';
-      if (!(await Linking.canOpenURL(telUrl))) throw new Error('Calling is not supported on this device.');
-      await Linking.openURL(telUrl);
-    } catch (error) {
-      Alert.alert('Dial 1930', error instanceof Error ? error.message : 'Please dial 1930 manually.');
-    }
-  };
+  const handleSOS = callCybercrimeHelpline;
 
   const handleQuickAction = (actionType: string) => {
     if (actionType === 'scan') {

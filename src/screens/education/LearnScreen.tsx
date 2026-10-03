@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -7,21 +7,14 @@ import { AppTheme } from '../../theme';
 import { Header } from '../../components/common/Header';
 import { CustomButton } from '../../components/common/CustomButton';
 import { SCAM_LIBRARY } from '../../data/scamLibrary';
+import { callCybercrimeHelpline } from '../../utils/callHelpline';
 
 export const LearnScreen: React.FC = () => {
   const theme = useTheme() as AppTheme;
   const navigation = useNavigation();
   const [openId, setOpenId] = useState<string | null>('digital_arrest');
 
-  const callHelpline = async () => {
-    try {
-      const telUrl = 'tel:1930';
-      if (!(await Linking.canOpenURL(telUrl))) throw new Error('Calling is not supported on this device.');
-      await Linking.openURL(telUrl);
-    } catch (error) {
-      Alert.alert('Dial 1930', error instanceof Error ? error.message : 'Please dial 1930 manually.');
-    }
-  };
+  const callHelpline = callCybercrimeHelpline;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Linking, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -11,6 +11,7 @@ import { CustomButton } from '../../components/common/CustomButton';
 import { AnalysisResult } from '../../types/analysis';
 import { sendFeedback } from '../../services/api/scamService';
 import { explainSimply } from '../../services/ai/geminiClient';
+import { callCybercrimeHelpline } from '../../utils/callHelpline';
 import { RootStackParamList } from '../../navigation/types';
 import * as Speech from 'expo-speech';
 
@@ -61,16 +62,6 @@ export const ScamAnalysisResultScreen: React.FC = () => {
     const script = `This message is rated ${threat.label}, risk ${result.riskScore} out of 100, ${result.scamType}. ${result.remediationSteps.join('. ')}`;
     setSpeaking(true);
     Speech.speak(script, { rate: 0.95, onDone: () => setSpeaking(false), onStopped: () => setSpeaking(false), onError: () => setSpeaking(false) });
-  };
-
-  const callCybercrimeHelpline = async () => {
-    try {
-      const telUrl = 'tel:1930';
-      if (!(await Linking.canOpenURL(telUrl))) throw new Error('Calling is not supported on this device.');
-      await Linking.openURL(telUrl);
-    } catch (error) {
-      Alert.alert('Unable to call 1930', error instanceof Error ? error.message : 'Please dial 1930 manually.');
-    }
   };
 
   const submitFeedback = async (verdict: 'scam_confirmed' | 'false_positive' | 'missed_scam') => {
