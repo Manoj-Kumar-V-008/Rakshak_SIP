@@ -1,0 +1,138 @@
+{
+  "appName": "रक्षक AI",
+  "tagline": "डिजिटल धोखाधड़ी के खिलाफ आपका बुद्धिमान संरक्षक",
+
+  "common": {
+    "safe": "सुरक्षित",
+    "suspicious": "संदिग्ध",
+    "danger": "खतरनाक",
+    "riskScore": "जोखिम स्कोर",
+    "scamType": "स्कैम प्रकार",
+    "redFlags": "खतरे के संकेत",
+    "whatToDo": "क्या करें",
+    "reportScam": "स्कैम के रूप में रिपोर्ट करें",
+    "markSafe": "सुरक्षित चिह्नित करें",
+    "shareWarning": "चेतावनी साझा करें",
+    "hearWarning": "चेतावनी सुनें",
+    "callHelpline": "साइबर अपराध हेल्पलाइन · 1930",
+    "offlineMode": "ऑफ़लाइन मोड",
+    "serverMode": "सर्वर मोड",
+    "analyzing": "विश्लेषण चल रहा है…",
+    "verifying": "सत्यापित किया जा रहा है…",
+    "scanning": "स्कैन किया जा रहा है…",
+    "reporting": "रिपोर्ट किया जा रहा है…",
+    "cancel": "रद्द करें",
+    "ok": "ठीक है",
+    "loggingIn": "साइन इन हो रहा है…"
+  },
+
+  "scanner": {
+    "title": "स्कैम स्कैनर",
+    "instruction": "स्पष्टीकरण वाले स्कैम पैटर्न के खिलाफ संदेश स्कैन करने के लिए पेस्ट करें।",
+    "placeholder": "संदिग्ध SMS, ईमेल या UPI लिंक संदेश यहां पेस्ट करें...",
+    "analyzeMessage": "संदेश विश्लेषण करें",
+    "verifyLink": "एक लिंक सत्यापित करें",
+    "verifyLinkInstruction": "जांचने के लिए कोई भी लिंक पेस्ट करें कि वह सुरक्षित है या स्कैम।",
+    "linkPlaceholder": "यहां एक लिंक पेस्ट करें (जैसे http://bit.ly/3xYz या www.example.com)",
+    "verifyLinkButton": "लिंक सत्यापित करें",
+    "scamLink": "स्कैम लिंक",
+    "suspiciousLink": "संदिग्ध",
+    "safeLink": "सुरक्षित लिंक",
+    "original": "मूल",
+    "destination": "गंतव्य",
+    "sampleMessages": "नमूना संदेश",
+    "scanVoice": "वॉयस क्लिप के बजाय स्कैन करें",
+    "scanSms": "एसएमएस के बजाय स्कैन करें"
+  },
+
+  "sms": {
+    "title": "एसएमएस स्कैनर",
+    "instruction": "स्कैम की जांच करने के लिए एसएमएस प्रेषक और संदेश शरीर पेस्ट करें।",
+    "senderPlaceholder": "प्रेषक आईडी (जैसे SBI-BNK, HDFCBK, V-AKZY)",
+    "messagePlaceholder": "यहां एसएमएस संदेश शरीर पेस्ट करें...",
+    "scanSms": "एसएमएस स्कैन करें",
+    "from": "से",
+    "message": "संदेश",
+    "sampleSms": "नमूना एसएमएस"
+  },
+
+  "dashboard": {
+    "title": "रक्षक AI",
+    "welcome": "नमस्ते, {name}!",
+    "greeting": "{language} मोड में सक्रिय गार्जियन शील्ड।",
+    "systemLive": "सिस्टम लाइव",
+    "scannerStatus": "एआई खतरा स्कैनर स्थिति",
+    "secure": "सुरक्षित",
+    "warn": "चेतावनी",
+    "aiShieldActive": "एआई शील्ड सक्रिय",
+    "threatAlerted": "खतरा सचेत",
+    "noScans": "अभी तक कोई स्कैन नहीं। स्कैन में संदेश पेस्ट करें, या वॉयस में कॉल क्लिप का विश्लेषण करें।",
+    "scanMix": "आपका स्कैन मिश्रण",
+    "safeScans": "सुरक्षित स्कैन",
+    "suspiciousScans": "संदिग्ध स्कैन",
+    "dangerScans": "खतरनाक स्कैन",
+    "protectionStatus": "सुरक्षा स्थिति",
+    "engine": "इंजन",
+    "offlineRules": "ऑफ़लाइन नियम",
+    "scans": "स्कैन",
+    "server": "सर्वर",
+    "liveWarnings": "लाइव स्कैम चेतावनी",
+    "smsProtection": "एसएमएस सुरक्षा",
+    "smsHistory": "एसएमएस स्कैन इतिहास",
+    "linkHistory": "लिंक सत्यापन इतिहास",
+    "noLinks": "अभी तक कोई लिंक सत्यापित नहीं।",
+    "noSms": "अभी तक कोई एसएमएस स्कैन नहीं।"
+  },
+
+  "sos": {
+    "title": "आपातकालीन अलर्ट",
+    "message": "मैं डिजिटल स्कैम का शिकार हो सकता हूं। कृपया मदद करें।",
+    "helpline": "साइबर अपराध हेल्पलाइन: 1930"
+  },
+
+  "profile": {
+    "title": "प्रोफ़ाइल और सेटिंग्स",
+    "language": "भाषा",
+    "english": "अंग्रेजी",
+    "hindi": "हिंदी",
+    "theme": "थीम",
+    "darkMode": "डार्क मोड",
+    "smsTracking": "एसएमएस ट्रैकिंग",
+    "emergencyContact": "आपातकालीन संपर्क"
+  },
+
+  "learn": {
+    "title": "स्कैम ज्ञान केंद्र",
+    "digitalArrest": "डिजिटल गिरफ्तारी स्कैम",
+    "credentialPhishing": "क्रेडेंशियल / केवाईसी फ़िशिंग",
+    "utilityDisconnection": "उपयोगिता विच्छेदन धोखाधड़ी",
+    "lotteryPrize": "लॉटरी / पुरस्कार स्कैम",
+    "fakeJob": "नकली नौकरी / कार्य स्कैम",
+    "investmentFraud": "निवेश धोखाधड़ी",
+    "loanHarassment": "तत्काल ऋण उत्पीड़न",
+    "maliciousApp": "दुर्भावनापूर्ण एपीके / कॉल हिजैक",
+    "suspiciousLink": "संदिग्ध छोटा लिंक"
+  },
+
+  "results": {
+    "title": "विश्लेषण परिणाम",
+    "rulesRiskScore": "नियम जोखिम स्कोर",
+    "subScores": "नियम उप-स्कोर",
+    "urgency": "तत्परता",
+    "impersonation": "प्रतिरूपण",
+    "coercion": "जबरदस्ती",
+    "financialAsk": "वित्तीय मांग",
+    "scannedMessage": "स्कैन किया गया संदेश",
+    "evidenceFound": "सबूत मिले",
+    "remediationSteps": "क्या करें",
+    "simpleExplanation": "सरल स्पष्टीकरण (ऑप्ट-इन)",
+    "explainInSimpleWords": "सरल शब्दों में समझाएं",
+    "sendToGemini": "जेमिनी पर भेजें?",
+    "explainConsent": "यह सरल स्पष्टीकरण के लिए स्कैन किए गए पाठ को Google Gemini पर भेजता है। केवल तभी जारी रखें यदि आप सहमत हैं।",
+    "explain": "समझाएं",
+    "geminiKeyNeeded": "जेमिनी कुंजी की आवश्यकता है",
+    "geminiKeyDetail": "पहले डेमो कनेक्शन में एक जेमिनी API कुंजी बचाएं। तब तक व्याख्याकार बंद रहेगा।",
+    "openSettings": "सेटिंग्स खोलें",
+    "offByDefault": "डिफ़ॉल्ट रूप से बंद। केवल तब यह पाठ Google Gemini पर भेजता है जब आप समझाएं टैप करते हैं।"
+  }
+}

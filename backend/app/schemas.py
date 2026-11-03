@@ -73,3 +73,89 @@ class FeedbackRequest(BaseModel):
 
 class FeedbackResponse(BaseModel):
     ok: bool
+
+
+# --- Link verification schemas ---
+
+class UrlCheck(BaseModel):
+    original: str
+    expanded: str | None = None
+    domain: str | None = None
+    scheme: str | None = None
+    isHttps: bool = False
+    redirectChain: list[str] = []
+    verdict: Literal["safe", "suspicious", "danger"]
+    riskScore: int = Field(ge=0, le=100)
+    reasons: list[str] = []
+    reputation: dict[str, object] | None = None
+
+
+class LinkAnalysisRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=2_000)
+
+
+class LinkAnalysisResult(BaseModel):
+    analysisId: str = Field(default_factory=lambda: str(uuid4()))
+    inputText: str
+    urls: list[UrlCheck]
+    overallVerdict: Literal["safe", "suspicious", "danger"]
+    overallRiskScore: int = Field(ge=0, le=100)
+    engine: dict[str, object]
+    trace: list[dict[str, object]]
+
+
+# --- Crowd-sourced link reporting schemas ---
+
+class ReportLinkRequest(BaseModel):
+    originalUrl: str = Field(min_length=1, max_length=2_000)
+    expandedUrl: str | None = Field(default=None, max_length=2_000)
+    domain: str = Field(min_length=1, max_length=255)
+    reporterText: str | None = Field(default=None, max_length=1_000)
+
+
+class ReportLinkResponse(BaseModel):
+    ok: bool
+    id: int
+
+
+class ReportedLinkEntry(BaseModel):
+    originalUrl: str
+    expandedUrl: str | None
+    domain: str
+    reporterText: str | None
+    createdAt: int
+
+
+# --- User authentication schemas ---
+
+class UserRegisterRequest(BaseModel):
+    email: str = Field(min_length=1, max_length=255)
+    password: str = Field(min_length=6, max_length=128)
+    name: str | None = Field(default=None, max_length=100)
+    phone_number: str | None = Field(default=None, max_length=20)
+    preferred_language: str = Field(default="en", max_length=10)
+
+
+class UserLoginRequest(BaseModel):
+    email: str = Field(min_length=1, max_length=255)
+    password: str = Field(min_length=1, max_length=128)
+
+
+class UserResponse(BaseModel):
+    id: str
+    email: str
+    name: str | None = None
+    phone_number: str | None = None
+    preferred_language: str
+    created_at: int
+    is_active: bool
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserResponse
+
+
+class AuthErrorResponse(BaseModel):
+    detail: str

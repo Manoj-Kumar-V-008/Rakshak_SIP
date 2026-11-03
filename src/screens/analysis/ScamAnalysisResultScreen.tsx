@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Alert, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -14,6 +14,7 @@ import { explainSimply } from '../../services/ai/geminiClient';
 import { callCybercrimeHelpline } from '../../utils/callHelpline';
 import { RootStackParamList } from '../../navigation/types';
 import * as Speech from 'expo-speech';
+import { sendScamAlert, areNotificationsEnabled } from '../../services/notifications/notificationService';
 
 interface RouteParams { result: AnalysisResult; }
 type BadgeVariant = 'emerald' | 'amber' | 'coral';
@@ -52,6 +53,22 @@ export const ScamAnalysisResultScreen: React.FC = () => {
   const [explaining, setExplaining] = useState(false);
   const [explanation, setExplanation] = useState<string | null>(null);
   const [speaking, setSpeaking] = useState(false);
+  const [notified, setNotified] = useState(false);
+
+  useEffect(() => {
+    const sendAlert = async () => {
+      if (notified || result.level !== 'danger') return;
+      if (await areNotificationsEnabled()) {
+        await sendScamAlert({
+          title: 'Scam Message Detected',
+          body: `High-risk message detected: ${result.scamType} (score ${result.riskScore}/100)`,
+          data: { score: String(result.riskScore), type: result.scamTypeId },
+        });
+        setNotified(true);
+      }
+    };
+    sendAlert();
+  }, [result, notified]);
 
   const hearWarning = async () => {
     if (speaking) {

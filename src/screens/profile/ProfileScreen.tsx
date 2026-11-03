@@ -7,6 +7,9 @@ import { CustomButton } from '../../components/common/CustomButton';
 import { useConfigStore } from '../../store/useConfigStore';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useNavigation, CommonActions } from '@react-navigation/native';
+import { t, setLanguage } from '../../locales';
+import { Language } from '../../locales';
+import { areNotificationsEnabled, requestNotificationPermissions } from '../../services/notifications/notificationService';
 
 export const ProfileScreen: React.FC = () => {
   const [showDb, setShowDb] = useState(false);
@@ -143,29 +146,47 @@ export const ProfileScreen: React.FC = () => {
   const theme = useTheme() as AppTheme;
   const navigation = useNavigation();
 
-  const { profile, toggleTheme, isDarkMode, resetConfig, updateProfile, scansHistory } = useConfigStore((state) => ({
+  const { profile, toggleTheme, isDarkMode, resetConfig, updateProfile, scansHistory, setLanguage: setStoreLanguage, notificationEnabled, setNotificationEnabled } = useConfigStore((state) => ({
     profile: state.profile,
     toggleTheme: state.toggleTheme,
     isDarkMode: state.isDarkMode,
     resetConfig: state.resetConfig,
     updateProfile: state.updateProfile,
     scansHistory: state.scansHistory,
+    setLanguage: state.setLanguage,
+    notificationEnabled: state.notificationEnabled,
+    setNotificationEnabled: state.setNotificationEnabled,
   }));
 
   const handleLanguageChange = () => {
     Alert.alert(
-      'Preferred Language',
+      t('profile.language'),
       'Select your language for active shield notifications:',
       [
-        { text: 'English', onPress: () => updateProfile({ preferredLanguage: 'en' }) },
-        { text: 'Hindi (हिन्दी)', onPress: () => updateProfile({ preferredLanguage: 'hi' }) },
+        { text: t('profile.english'), onPress: () => { setStoreLanguage('en'); setLanguage('en'); updateProfile({ preferredLanguage: 'en' }); } },
+        { text: t('profile.hindi'), onPress: () => { setStoreLanguage('hi'); setLanguage('hi'); updateProfile({ preferredLanguage: 'hi' }); } },
         { text: 'Tamil (தமிழ்)', onPress: () => updateProfile({ preferredLanguage: 'ta' }) },
-        { text: 'Telugu (ತೆಲುಗು)', onPress: () => updateProfile({ preferredLanguage: 'te' }) },
+        { text: 'Telugu (तेಲುগు)', onPress: () => updateProfile({ preferredLanguage: 'te' }) },
         { text: 'Kannada (ಕನ್ನಡ)', onPress: () => updateProfile({ preferredLanguage: 'kn' }) },
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
       ],
       { cancelable: true }
     );
+  };
+
+  const handleToggleNotifications = async () => {
+    if (notificationEnabled) {
+      setNotificationEnabled(false);
+      Alert.alert('Notifications disabled', 'Enable notifications in Profile settings to receive scam alerts.');
+    } else {
+      const granted = await requestNotificationPermissions();
+      setNotificationEnabled(granted);
+      if (granted) {
+        Alert.alert('Notifications enabled', 'You will receive real-time alerts when a scam is detected.');
+      } else {
+        Alert.alert('Notifications disabled', 'Enable notifications in Profile settings to receive scam alerts.');
+      }
+    }
   };
 
   const handleReset = () => {
@@ -209,7 +230,7 @@ export const ProfileScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Header title="Shield Settings" />
+      <Header title={t('profile.title')} />
       
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* User Card */}
@@ -239,8 +260,7 @@ export const ProfileScreen: React.FC = () => {
         
         <View style={[styles.settingsGroup, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
           {/* Preferred Language */}
-          <TouchableOpacity onPress={handleLanguageChange} style={styles.settingsItem}>
-            <Ionicons name="language-outline" size={20} color={theme.colors.primary} style={styles.itemIcon} />
+          <TouchableOpacity onPress={handleLanguageChange} style={styles.settingsItem}>            <Ionicons name="language-outline" size={20} color={theme.colors.primary} style={styles.itemIcon} />
             <View style={styles.itemTextContainer}>
               <Text style={[styles.itemLabel, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>
                 Preferred Language
@@ -311,6 +331,26 @@ export const ProfileScreen: React.FC = () => {
               </Text>
             </View>
           </View>
+
+          <View style={[styles.divider, { backgroundColor: theme.colors.outline }]} />
+
+          {/* Push Notifications */}
+          <TouchableOpacity onPress={handleToggleNotifications} style={styles.settingsItem}>
+            <MaterialCommunityIcons name={notificationEnabled ? 'bell' : 'bell-off'} size={20} color={theme.colors.primary} style={styles.itemIcon} />
+            <View style={styles.itemTextContainer}>
+              <Text style={[styles.itemLabel, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>
+                Push Notifications
+              </Text>
+              <Text style={[styles.itemSubLabel, theme.fonts.caption, { color: theme.colors.textSecondary }]}>
+                {notificationEnabled ? 'Scam alerts enabled' : 'Alerts disabled'}
+              </Text>
+            </View>
+            <MaterialCommunityIcons
+              name={notificationEnabled ? 'toggle-switch' : 'toggle-switch-off-outline'}
+              size={32}
+              color={notificationEnabled ? theme.colors.primary : theme.colors.textMuted}
+            />
+          </TouchableOpacity>
         </View>
 
         {/* Local Database Tables Explorer */}

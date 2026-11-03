@@ -18,10 +18,12 @@ export type RootStackParamList = {
   Splash: undefined;
   Onboarding: NavigatorScreenParams<OnboardingStackParamList>;
   App: NavigatorScreenParams<AppTabParamList>;
+  Auth: NavigatorScreenParams<AuthStackParamList>;
   ScamAnalysisResult: {
     result: AnalysisResult;
   };
   VoiceScanner: undefined;
+  SMSScreen: undefined;
   ScamDetails: {
     scamId: string;
     title: string;
@@ -32,4 +34,11 @@ export type RootStackParamList = {
     scamScenarioType?: string;
   };
   AdminSettings: undefined;
+  Login: undefined;
+  Register: undefined;
+};
+
+export type AuthStackParamList = {
+  Login: undefined;
+  Register: undefined;
 };
