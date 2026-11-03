@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTheme } from 'react-native-paper';
@@ -14,7 +14,10 @@ import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { ScamAnalysisResultScreen } from '../screens/analysis/ScamAnalysisResultScreen';
 import { AdminSettingsScreen } from '../screens/settings/AdminSettingsScreen';
 import { VoiceScannerScreen } from '../screens/scanner/VoiceScannerScreen';
-import { LearnScreen } from '../screens/education/LearnScreen';
+import { SMSScreen } from '../screens/scanner/SMSScreen';
+import { LoginScreen } from '../screens/auth/LoginScreen';
+import { RegisterScreen } from '../screens/auth/RegisterScreen';
+import { AuthProvider, useAuth } from '../context/AuthContext';
 
 // --- NAVIGATOR CREATIONS ---
 const RootStack = createStackNavigator<RootStackParamList>();
@@ -39,7 +42,7 @@ const OnboardingNavigator = () => {
 // Main App Bottom Tab Nav Flow
 const AppNavigator = () => {
   const theme = useTheme() as AppTheme;
-  
+
   return (
     <AppTabs.Navigator
       initialRouteName="HomeTab"
@@ -47,7 +50,7 @@ const AppNavigator = () => {
         headerShown: false,
         tabBarIcon: ({ color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap = 'home-outline';
-          
+
           if (route.name === 'HomeTab') {
             iconName = 'home-outline';
           } else if (route.name === 'ScannerTab') {
@@ -73,48 +76,99 @@ const AppNavigator = () => {
         tabBarLabelStyle: theme.fonts.labelSmall,
       })}
     >
-      <AppTabs.Screen 
-        name="HomeTab" 
-        component={DashboardScreen} 
+      <AppTabs.Screen
+        name="HomeTab"
+        component={DashboardScreen}
         options={{ tabBarLabel: 'Home' }}
       />
-      <AppTabs.Screen 
-        name="ScannerTab" 
-        component={ScannerScreen} 
+      <AppTabs.Screen
+        name="ScannerTab"
+        component={ScannerScreen}
         options={{ tabBarLabel: 'Scan' }}
       />
       <AppTabs.Screen
         name="KnowledgeTab"
-        component={LearnScreen}
+        component={DashboardScreen}
         options={{ tabBarLabel: 'Learn' }}
       />
-      <AppTabs.Screen 
-        name="ProfileTab" 
-        component={ProfileScreen} 
+      <AppTabs.Screen
+        name="ProfileTab"
+        component={ProfileScreen}
         options={{ tabBarLabel: 'Settings' }}
       />
     </AppTabs.Navigator>
   );
 };
 
-// Root Router Entry
-export const NavigationRouter = () => {
+// Auth Stack (Login / Register)
+const AuthStackNavigator = () => {
   const theme = useTheme() as AppTheme;
   return (
     <RootStack.Navigator
-      initialRouteName="Splash"
       screenOptions={{
         headerShown: false,
         cardStyle: { backgroundColor: theme.colors.background },
       }}
     >
-      <RootStack.Screen name="Splash" component={SplashScreen} />
-      <RootStack.Screen name="Onboarding" component={OnboardingNavigator} />
-      <RootStack.Screen name="App" component={AppNavigator} />
-      <RootStack.Screen name="ScamAnalysisResult" component={ScamAnalysisResultScreen} />
-      <RootStack.Screen name="VoiceScanner" component={VoiceScannerScreen} />
-      <RootStack.Screen name="AdminSettings" component={AdminSettingsScreen} />
+      <RootStack.Screen name="Login" component={LoginScreen} />
+      <RootStack.Screen name="Register" component={RegisterScreen} />
     </RootStack.Navigator>
+  );
+};
+
+// Root Router Entry
+export const NavigationRouter = () => {
+  const theme = useTheme() as AppTheme;
+  const { isLoading, isAuthenticated } = useAuth();
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setReady(true);
+    }
+  }, [isLoading]);
+
+  // While hydrating auth state, show splash.
+  if (!ready) {
+    return (
+      <RootStack.Navigator
+        screenOptions={{
+          headerShown: false,
+          cardStyle: { backgroundColor: theme.colors.background },
+        }}
+      >
+        <RootStack.Screen name="Splash" component={SplashScreen} />
+      </RootStack.Navigator>
+    );
+  }
+
+  return (
+    <AuthProvider>
+      <RootStack.Navigator
+        initialRouteName={isAuthenticated ? 'App' : 'Login'}
+        screenOptions={{
+          headerShown: false,
+          cardStyle: { backgroundColor: theme.colors.background },
+        }}
+      >
+        <RootStack.Screen name="Splash" component={SplashScreen} />
+        <RootStack.Screen name="Onboarding" component={OnboardingNavigator} />
+        {isAuthenticated ? (
+          <>
+            <RootStack.Screen name="App" component={AppNavigator} />
+            <RootStack.Screen name="ScamAnalysisResult" component={ScamAnalysisResultScreen} />
+            <RootStack.Screen name="VoiceScanner" component={VoiceScannerScreen} />
+            <RootStack.Screen name="SMSScreen" component={SMSScreen} />
+            <RootStack.Screen name="AdminSettings" component={AdminSettingsScreen} />
+          </>
+        ) : (
+          <>
+            <RootStack.Screen name="Login" component={LoginScreen} />
+            <RootStack.Screen name="Register" component={RegisterScreen} />
+          </>
+        )}
+      </RootStack.Navigator>
+    </AuthProvider>
   );
 };
 

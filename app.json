@@ -13,10 +13,21 @@
       "expo-secure-store",
       "expo-status-bar",
       "expo-font",
+      "expo-notifications",
       [
         "expo-audio",
         {
           "microphonePermission": "Rakshak AI needs microphone access to transcribe suspicious call clips for scam analysis."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./src/assets/images/icon.png",
+          "color": "#3F8CFF",
+          "sounds": ["./src/assets/sounds/notification.wav"],
+          "androidMode": "default",
+          "androidCollapsedTitle": "Rakshak AI Alert"
         }
       ]
     ],

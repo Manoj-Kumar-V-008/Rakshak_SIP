@@ -1,17 +1,34 @@
 import { AnalysisResult, AnalysisResultSchema } from '../../types/analysis';
 import { useConfigStore } from '../../store/useConfigStore';
 import { FileSystemUploadType, uploadAsync } from 'expo-file-system/legacy';
+import * as SecureStore from 'expo-secure-store';
 
 export class ScamServiceError extends Error {}
 
 const baseUrlFor = (url: string) => url.trim().replace(/\/$/, '').replace(/\/api\/v1$/, '');
+
+const TOKEN_KEY = 'rakshak_auth_token';
+
+const getAuthHeaders = async (): Promise<HeadersInit> => {
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  try {
+    const token = await SecureStore.getItemAsync(TOKEN_KEY);
+    if (token) {
+      (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+    }
+  } catch {
+    // Ignore SecureStore errors.
+  }
+  return headers;
+};
 
 export const analyzeText = async (text: string): Promise<AnalysisResult> => {
   const baseUrl = baseUrlFor(useConfigStore.getState().backendUrl);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8_000);
   try {
-    const response = await fetch(`${baseUrl}/v1/analyze/text`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text, lang: 'auto', source: 'paste' }), signal: controller.signal });
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${baseUrl}/v1/analyze/text`, { method: 'POST', headers, body: JSON.stringify({ text, lang: 'auto', source: 'paste' }), signal: controller.signal });
     if (!response.ok) throw new ScamServiceError(`Analysis service returned ${response.status}.`);
     return AnalysisResultSchema.parse(await response.json());
   } catch (error) {
@@ -28,7 +45,8 @@ export const sendFeedback = async (analysisId: string, verdict: FeedbackVerdict,
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8_000);
   try {
-    const response = await fetch(`${baseUrl}/v1/feedback`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ analysisId, verdict, text }), signal: controller.signal });
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${baseUrl}/v1/feedback`, { method: 'POST', headers, body: JSON.stringify({ analysisId, verdict, text }), signal: controller.signal });
     if (!response.ok) throw new ScamServiceError(`Feedback service returned ${response.status}.`);
   } catch (error) {
     if (error instanceof ScamServiceError) throw error;
@@ -80,7 +98,8 @@ export const fetchRules = async (): Promise<unknown> => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5_000);
   try {
-    const response = await fetch(`${baseUrl}/v1/rules`, { signal: controller.signal });
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${baseUrl}/v1/rules`, { headers, signal: controller.signal });
     if (!response.ok) throw new ScamServiceError(`Rules service returned ${response.status}.`);
     return (await response.json()) as unknown;
   } catch (error) {
@@ -105,5 +124,105 @@ export const checkHealth = async (url: string): Promise<HealthStatus> => {
     if (error instanceof ScamServiceError) throw error;
     if (error instanceof Error && error.name === 'AbortError') throw new ScamServiceError('Connection timed out after 5 seconds.');
     throw new ScamServiceError('Unable to reach the server. Check the URL, Wi-Fi/hotspot, and firewall.');
+  } finally { clearTimeout(timeout); }
+};
+
+export type LinkVerdict = 'safe' | 'suspicious' | 'danger';
+
+export interface UrlCheckResult {
+  original: string;
+  expanded: string | null;
+  domain: string | null;
+  scheme: string | null;
+  isHttps: boolean;
+  redirectChain: string[];
+  verdict: LinkVerdict;
+  riskScore: number;
+  reasons: string[];
+  reputation: { threatType: string; platformType: string; threatEntryType: string; cacheDuration?: string } | null;
+}
+
+export interface LinkAnalysisResponse {
+  inputText: string;
+  urls: UrlCheckResult[];
+  overallVerdict: LinkVerdict;
+  overallRiskScore: number;
+  engine: { mode: string; version: string };
+  trace: Array<{ stage: string; ms: number; detail: string }>;
+}
+
+export const verifyLink = async (text: string): Promise<LinkAnalysisResponse> => {
+  const baseUrl = baseUrlFor(useConfigStore.getState().backendUrl);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15_000);
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${baseUrl}/v1/analyze/link`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ text }),
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new ScamServiceError(`Link verification returned ${response.status}.`);
+    return (await response.json()) as LinkAnalysisResponse;
+  } catch (error) {
+    if (error instanceof ScamServiceError) throw error;
+    if (error instanceof Error && error.name === 'AbortError') throw new ScamServiceError('Link verification timed out after 15 seconds.');
+    throw new ScamServiceError('Unable to reach the link verification service. Check the backend URL and Wi-Fi connection.');
+  } finally { clearTimeout(timeout); }
+};
+
+export interface ReportLinkRequest {
+  originalUrl: string;
+  expandedUrl: string | null;
+  domain: string;
+  reporterText: string | null;
+}
+
+export interface ReportLinkResponse {
+  ok: boolean;
+  id: number;
+}
+
+export interface ReportedLinkEntry {
+  originalUrl: string;
+  expandedUrl: string | null;
+  domain: string;
+  reporterText: string | null;
+  createdAt: number;
+}
+
+export const reportScamLink = async (request: ReportLinkRequest): Promise<ReportLinkResponse> => {
+  const baseUrl = baseUrlFor(useConfigStore.getState().backendUrl);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10_000);
+  try {
+    const response = await fetch(`${baseUrl}/v1/report/link`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request),
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new ScamServiceError(`Report link returned ${response.status}.`);
+    return (await response.json()) as ReportLinkResponse;
+  } catch (error) {
+    if (error instanceof ScamServiceError) throw error;
+    if (error instanceof Error && error.name === 'AbortError') throw new ScamServiceError('Report link timed out after 10 seconds.');
+    throw new ScamServiceError('Unable to report link. Check the backend URL and Wi-Fi connection.');
+  } finally { clearTimeout(timeout); }
+};
+
+export const fetchScamLinkBlocklist = async (): Promise<ReportedLinkEntry[]> => {
+  const baseUrl = baseUrlFor(useConfigStore.getState().backendUrl);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8_000);
+  try {
+    const response = await fetch(`${baseUrl}/v1/report/links`, { signal: controller.signal });
+    if (!response.ok) throw new ScamServiceError(`Blocklist returned ${response.status}.`);
+    return (await response.json()) as ReportedLinkEntry[];
+  } catch (error) {
+    if (error instanceof ScamServiceError) throw error;
+    if (error instanceof Error && error.name === 'AbortError') throw new ScamServiceError('Blocklist timed out after 8 seconds.');
+    throw new ScamServiceError('Unable to fetch scam link blocklist.');
   } finally { clearTimeout(timeout); }
 };

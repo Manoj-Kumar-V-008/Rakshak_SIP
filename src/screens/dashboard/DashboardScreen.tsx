@@ -7,6 +7,7 @@ import { StatusBadge } from '../../components/common/StatusBadge';
 import { useConfigStore } from '../../store/useConfigStore';
 import { getRulesVersion, isUsingRemoteRules } from '../../services/engine/localEngine';
 import { callCybercrimeHelpline } from '../../utils/callHelpline';
+import { t } from '../../locales';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -15,6 +16,8 @@ export const DashboardScreen: React.FC = () => {
   const navigation = useNavigation();
   const profile = useConfigStore((state) => state.profile);
   const scansHistory = useConfigStore((state) => state.scansHistory);
+  const linkHistory = useConfigStore((state) => state.linkHistory);
+  const smsHistory = useConfigStore((state) => state.smsHistory);
   const engineMode = useConfigStore((state) => state.engineMode);
   const backendUrl = useConfigStore((state) => state.backendUrl);
   const highRisk = scansHistory.filter((s) => s.score > 60).length;
@@ -185,6 +188,31 @@ export const DashboardScreen: React.FC = () => {
         </View>
         )}
 
+        {/* SMS Verification Stats */}
+        <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary, marginTop: 16 }]}>
+          {t('dashboard.smsProtection')}
+        </Text>
+        <View style={[styles.chartCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
+          {[
+            { label: t('dashboard.safeScans'), count: smsHistory.filter((s) => s.score <= 20).length, color: theme.colors.safe },
+            { label: t('dashboard.suspiciousScans'), count: smsHistory.filter((s) => s.score > 20 && s.score <= 60).length, color: theme.colors.warning },
+            { label: t('dashboard.dangerScans'), count: smsHistory.filter((s) => s.score > 60).length, color: theme.colors.danger },
+          ].map((row) => (
+          <View key={row.label} style={styles.chartItem}>
+            <View style={styles.chartLabelRow}>
+              <Text style={[styles.chartLabel, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>
+                {row.label}
+              </Text>
+              <Text style={[styles.chartPercent, theme.fonts.caption, { color: row.color }]}>{row.count}</Text>
+            </View>
+            <View style={[styles.progressBarBg, { backgroundColor: theme.colors.surfaceContainer }]}>
+              <View style={[styles.progressBarFill, { backgroundColor: row.color, width: smsHistory.length > 0 ? `${Math.round((row.count / smsHistory.length) * 100)}%` : '0%' }]} />
+            </View>
+          </View>
+          ))}
+          {smsHistory.length === 0 && <Text style={[theme.fonts.bodySmall, { color: theme.colors.textSecondary, textAlign: 'center', marginTop: 12 }]}>{t('dashboard.noSms')}. Go to Scan → Scan SMS.</Text>}
+        </View>
+
         {/* Scans Database History (PHYSICAL DB LIST VERIFICATION) */}
         <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary, marginTop: 16 }]}>
           Local Database Logs ({scansHistory.length} items)
@@ -219,6 +247,96 @@ export const DashboardScreen: React.FC = () => {
                   <Text numberOfLines={1} style={[styles.historyText, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>
                     {item.text}
                   </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
+
+        {/* Link Verification History */}
+        <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary, marginTop: 16 }]}>
+          {t('dashboard.linkHistory')} ({linkHistory.length} items)
+        </Text>
+        {linkHistory.length === 0 ? (
+          <View style={[styles.emptyCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
+            <MaterialCommunityIcons name="link" size={24} color={theme.colors.textMuted} style={{ marginBottom: 6 }} />
+            <Text style={[styles.emptyText, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>
+              {t('dashboard.noLinks')}. Verify a link in the Scanner tab to build your link history.
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.historyList}>
+            {linkHistory.map((item) => {
+              const risk = getRiskProps(item.riskScore);
+              const verdictColor = item.verdict === 'danger' ? theme.colors.danger : item.verdict === 'suspicious' ? theme.colors.warning : theme.colors.safe;
+              return (
+                <TouchableOpacity
+                  key={item.id}
+                  activeOpacity={0.8}
+                  onPress={() => Alert.alert(
+                    `Link Verdict (${item.riskScore}/100)`,
+                    `Original: ${item.originalUrl}\n${item.expandedUrl ? `Destination: ${item.expandedUrl}\n` : ''}Domain: ${item.domain ?? 'N/A'}\nTime: ${item.timestamp}\n\nReasons: ${item.reasons.join(', ') || 'None'}`
+                  )}
+                  style={[styles.historyCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}
+                >
+                  <View style={styles.historyCardHeader}>
+                    <Text style={[styles.historyTime, theme.fonts.caption, { color: theme.colors.textMuted }]}>
+                      🕒 {item.timestamp}
+                    </Text>
+                    <StatusBadge label={item.verdict.toUpperCase()} variant={item.verdict === 'danger' ? 'coral' : item.verdict === 'suspicious' ? 'amber' : 'emerald'} />
+                  </View>
+                  <View style={[styles.historyTextContainer, { backgroundColor: theme.colors.surfaceContainer, borderRadius: 8, padding: 8, marginTop: 6 }]}>
+                    <Text numberOfLines={1} style={[styles.historyText, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>
+                      {item.originalUrl}
+                    </Text>
+                    {item.expandedUrl && (
+                      <Text numberOfLines={1} style={[styles.historyText, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>
+                        → {item.expandedUrl}
+                      </Text>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
+
+        {/* SMS History */}
+        <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary, marginTop: 16 }]}>
+          {t('dashboard.smsHistory')} ({smsHistory.length} items)
+        </Text>
+        {smsHistory.length === 0 ? (
+          <View style={[styles.emptyCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
+            <MaterialCommunityIcons name="message-outline" size={24} color={theme.colors.textMuted} style={{ marginBottom: 6 }} />
+            <Text style={[styles.emptyText, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>
+              {t('dashboard.noSms')}. Scan an SMS in the Scanner tab to build your SMS history.
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.historyList}>
+            {smsHistory.map((item) => {
+              const risk = getRiskProps(item.score);
+              return (
+                <TouchableOpacity
+                  key={item.id}
+                  activeOpacity={0.8}
+                  onPress={() => Alert.alert(
+                    `SMS Verdict (${item.score}/100)`,
+                    `From: ${item.sender}\nTime: ${item.timestamp}\n\nMessage:\n"${item.text}"\n\nType: ${item.type}\nRisk Flags: ${item.indicators.join(', ')}`
+                  )}
+                  style={[styles.historyCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}
+                >
+                  <View style={styles.historyCardHeader}>
+                    <Text style={[styles.historyTime, theme.fonts.caption, { color: theme.colors.textMuted }]}>
+                      🕒 {item.timestamp}
+                    </Text>
+                    <StatusBadge label={item.level.toUpperCase()} variant={item.level === 'danger' ? 'coral' : item.level === 'suspicious' ? 'amber' : 'emerald'} />
+                  </View>
+                  <View style={[styles.historyTextContainer, { backgroundColor: theme.colors.surfaceContainer, borderRadius: 8, padding: 8, marginTop: 6 }]}>
+                    <Text numberOfLines={2} style={[styles.historyText, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>
+                      {item.sender}: {item.text}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
               );
             })}
@@ -477,6 +595,12 @@ const styles = StyleSheet.create({
   },
   historyText: {
     fontStyle: 'italic',
+  },
+  historyTextContainer: {
+    backgroundColor: '#1E293B',
+    borderRadius: 8,
+    padding: 8,
+    marginTop: 6,
   },
   engineGrid: {
     flexDirection: 'row',

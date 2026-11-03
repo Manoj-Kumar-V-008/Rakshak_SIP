@@ -5,34 +5,50 @@ import { useNavigation, CommonActions } from '@react-navigation/native';
 import { useConfigStore } from '../../store/useConfigStore';
 import { AppTheme } from '../../theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { setupPushNotifications } from '../../services/notifications/notificationService';
 
 export const SplashScreen: React.FC = () => {
   const theme = useTheme() as AppTheme;
   const navigation = useNavigation();
   const onboardingCompleted = useConfigStore((state) => state.profile.onboardingCompleted);
+  const notificationEnabled = useConfigStore((state) => state.notificationEnabled);
 
   useEffect(() => {
-    // Simulate initial loading (state hydration check, loading assets)
-    const initializeApp = setTimeout(() => {
-      if (onboardingCompleted) {
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [{ name: 'App' }],
-          })
-        );
-      } else {
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [{ name: 'Onboarding' }],
-          })
-        );
+    const initializeApp = async () => {
+      // Register for push notifications if enabled.
+      if (notificationEnabled) {
+        try {
+          await setupPushNotifications();
+        } catch {
+          // Silent failure - app works without push notifications.
+        }
       }
-    }, 1500); // 1.5 seconds loading time for visual transition
 
-    return () => clearTimeout(initializeApp);
-  }, [onboardingCompleted, navigation]);
+      setTimeout(() => {
+        if (onboardingCompleted) {
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: 'App' }],
+            })
+          );
+        } else {
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: 'Onboarding' }],
+            })
+          );
+        }
+      }, 1500); // 1.5 seconds loading time for visual transition
+    };
+
+    initializeApp();
+
+    return () => {
+      // No cleanup needed for async function.
+    };
+  }, [onboardingCompleted, navigation, notificationEnabled]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
