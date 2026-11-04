@@ -14,7 +14,7 @@ from app.pipeline.rules import RULES, TYPE_DETAILS, _type_for, rule_signals
 from app.schemas import AnalysisResult, Engine, SubScores, TraceStep
 
 
-def run_pipeline(text: str) -> AnalysisResult:
+def run_pipeline(text: str, gemini_key: str | None = None) -> AnalysisResult:
     started = time.perf_counter()
     normalized = normalize_text(text)
     lang = detect_language(normalized)
@@ -28,7 +28,7 @@ def run_pipeline(text: str) -> AnalysisResult:
     semantic_ms = round((time.perf_counter() - t_sem) * 1000)
 
     t_llm = time.perf_counter()
-    p_llm, llm_type, llm_detail = llm_mod.score(normalized)
+    p_llm, llm_type, llm_detail = llm_mod.score(normalized, override_key=gemini_key)
     llm_ms = round((time.perf_counter() - t_llm) * 1000)
     second = p_llm if p_llm is not None else p_semantic
 

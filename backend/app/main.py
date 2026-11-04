@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.pipeline.rules import RULES, analyze_text
@@ -45,11 +45,12 @@ def root() -> dict[str, object]:
 
 
 @app.get("/health")
-def health() -> dict[str, object]:
+def health(req: Request) -> dict[str, object]:
     from app.pipeline import llm as llm_mod
     from app.pipeline import semantic as semantic_mod
 
-    llm_ready = llm_mod.is_available()
+    client_key = req.headers.get("x-gemini-api-key")
+    llm_ready = llm_mod.is_available(override_key=client_key)
     semantic_ready = semantic_mod.is_available()
     engine_mode = "hybrid-llm" if llm_ready else ("hybrid" if semantic_ready else "rules-only")
 
@@ -71,8 +72,9 @@ def get_rules() -> dict[str, object]:
 
 
 @app.post("/v1/analyze/text", response_model=AnalysisResult)
-def analyze(request: AnalyzeTextRequest) -> AnalysisResult:
+def analyze(request: AnalyzeTextRequest, req: Request) -> AnalysisResult:
     try:
-        return analyze_text(request.text)
+        client_key = req.headers.get("x-gemini-api-key")
+        return analyze_text(request.text, gemini_key=client_key)
     except ValueError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error

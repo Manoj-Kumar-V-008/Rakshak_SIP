@@ -74,12 +74,17 @@ export const ScannerScreen: React.FC = () => {
     setLoading(true);
     setConsoleLogs([t('common.analyzing')]);
     try {
-      const { result, via } = await analyze(text);
+      const { result, via, serverError } = await analyze(text);
       setConsoleLogs(result.trace.map((step) => `[${step.stage.toUpperCase()}] ${step.detail} (${step.ms} ms)`));
       addScanRecord({ text: result.displayText, score: result.riskScore, type: result.scamType, indicators: result.indicators, remediationSteps: result.remediationSteps });
       setMessage('');
       navigation.navigate('ScamAnalysisResult', { result });
-      if (via === 'offline') Alert.alert(t('common.offlineMode'), 'The server was unavailable. This scan used the on-device rules engine.');
+      if (via === 'offline') {
+        Alert.alert(
+          t('common.offlineMode'),
+          serverError ? `Backend unreachable:\n${serverError}\n\nFalling back to on-device rules.` : 'This scan used the on-device rules engine.'
+        );
+      }
     } catch (error) {
       const detail = error instanceof Error ? error.message : 'Unknown error.';
       setConsoleLogs([`[ERROR] ${detail}`]);
@@ -93,7 +98,7 @@ export const ScannerScreen: React.FC = () => {
     setLinkLoading(true);
     setLinkResult(null);
     try {
-      const { result, via } = await verifyLink(text);
+      const { result, via, serverError } = await verifyLink(text);
       setLinkResult(result);
       setLinkInput('');
       const worst = result.urls.reduce((prev, cur) => (cur.riskScore > prev.riskScore ? cur : prev), result.urls[0]);
@@ -106,7 +111,10 @@ export const ScannerScreen: React.FC = () => {
         reasons: worst.reasons,
       });
       if (via === 'offline') {
-        Alert.alert(t('common.offlineMode'), 'The server was unavailable. Link checks used on-device heuristics.');
+        Alert.alert(
+          t('common.offlineMode'),
+          serverError ? `Backend unreachable:\n${serverError}\n\nLink checks used on-device heuristics.` : 'The server was unavailable. Link checks used on-device heuristics.'
+        );
       }
     } catch (error) {
       const detail = error instanceof Error ? error.message : 'Unknown error.';

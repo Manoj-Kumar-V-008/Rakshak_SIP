@@ -2,6 +2,7 @@ import { AnalysisResult, AnalysisResultSchema } from '../../types/analysis';
 import { useConfigStore } from '../../store/useConfigStore';
 import { FileSystemUploadType, uploadAsync } from 'expo-file-system/legacy';
 import * as SecureStore from 'expo-secure-store';
+import { getGeminiKey } from '../ai/geminiClient';
 
 export class ScamServiceError extends Error {}
 
@@ -16,6 +17,10 @@ const getAuthHeaders = async (): Promise<HeadersInit> => {
     if (token) {
       (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
     }
+    const geminiKey = await getGeminiKey();
+    if (geminiKey) {
+      (headers as Record<string, string>)['X-Gemini-API-Key'] = geminiKey;
+    }
   } catch {
     // Ignore SecureStore errors.
   }
@@ -25,7 +30,8 @@ const getAuthHeaders = async (): Promise<HeadersInit> => {
 export const analyzeText = async (text: string): Promise<AnalysisResult> => {
   const baseUrl = baseUrlFor(useConfigStore.getState().backendUrl);
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8_000);
+  // 35s timeout to allow Render container wake-up and Gemini LLM latency
+  const timeout = setTimeout(() => controller.abort(), 35_000);
   try {
     const headers = await getAuthHeaders();
     const response = await fetch(`${baseUrl}/v1/analyze/text`, { method: 'POST', headers, body: JSON.stringify({ text, lang: 'auto', source: 'paste' }), signal: controller.signal });
@@ -33,8 +39,8 @@ export const analyzeText = async (text: string): Promise<AnalysisResult> => {
     return AnalysisResultSchema.parse(await response.json());
   } catch (error) {
     if (error instanceof ScamServiceError) throw error;
-    if (error instanceof Error && error.name === 'AbortError') throw new ScamServiceError('Analysis service did not respond within 8 seconds.');
-    throw new ScamServiceError('Unable to reach the analysis service. Check the backend URL and Wi-Fi connection.');
+    if (error instanceof Error && error.name === 'AbortError') throw new ScamServiceError('Analysis service did not respond within 35 seconds. Render free tier may be cold-starting; retry in a few seconds.');
+    throw new ScamServiceError(`Unable to reach the analysis service at "${baseUrl}". Check your backend URL and internet connection.`);
   } finally { clearTimeout(timeout); }
 };
 
@@ -73,6 +79,15 @@ export const analyzeAudio = async (uri: string, fileName = 'clip.m4a'): Promise<
   } catch (error) {
     throw new ScamServiceError(`Server unreachable (${error instanceof Error ? error.message : 'no detail'}). Fix Test connection first.`);
   }
+
+  const geminiKey = await getGeminiKey();
+  const uploadHeaders: Record<string, string> = {};
+  if (geminiKey) uploadHeaders['X-Gemini-API-Key'] = geminiKey;
+  try {
+    const token = await SecureStore.getItemAsync(TOKEN_KEY);
+    if (token) uploadHeaders['Authorization'] = `Bearer ${token}`;
+  } catch { /* ignore */ }
+
   // NOTE: fetch() FormData file parts throw "Unsupported FormDataPart implementation"
   // on this SDK, so voice uses the native expo-file-system uploader instead.
   const upload = uploadAsync(`${baseUrl}/v1/analyze/audio`, uri, {
@@ -80,6 +95,7 @@ export const analyzeAudio = async (uri: string, fileName = 'clip.m4a'): Promise<
     uploadType: FileSystemUploadType.MULTIPART,
     fieldName: 'file',
     mimeType: mimeFor(fileName),
+    headers: uploadHeaders,
   }).then((result) => {
     if (result.status === 503) throw new ScamServiceError('Voice transcription is not ready on the server. Either pip install faster-whisper and pre-run once, or set a Gemini key (RAKSHAK_LLM_PROVIDER=gemini) for cloud transcription.');
     if (result.status === 415) throw new ScamServiceError('Unsupported audio type. Use m4a/wav/mp3.');
@@ -122,7 +138,8 @@ export const checkHealth = async (url: string): Promise<HealthStatus> => {
   // 35s timeout to allow Render free tier container spin-up (cold starts can take 20-30s)
   const timeout = setTimeout(() => controller.abort(), 35_000);
   try {
-    const response = await fetch(`${baseUrlFor(url)}/health`, { signal: controller.signal });
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${baseUrlFor(url)}/health`, { headers, signal: controller.signal });
     if (!response.ok) throw new ScamServiceError(`Server returned HTTP ${response.status}.`);
     const payload: unknown = await response.json();
     if (!payload || typeof payload !== 'object' || !('status' in payload) || !('engine' in payload) || !('rulesVersion' in payload)) throw new ScamServiceError('Server returned an invalid health response.');
@@ -169,7 +186,7 @@ export interface LinkAnalysisResponse {
 export const verifyLink = async (text: string): Promise<LinkAnalysisResponse> => {
   const baseUrl = baseUrlFor(useConfigStore.getState().backendUrl);
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15_000);
+  const timeout = setTimeout(() => controller.abort(), 30_000);
   try {
     const headers = await getAuthHeaders();
     const response = await fetch(`${baseUrl}/v1/analyze/link`, {
@@ -182,7 +199,7 @@ export const verifyLink = async (text: string): Promise<LinkAnalysisResponse> =>
     return (await response.json()) as LinkAnalysisResponse;
   } catch (error) {
     if (error instanceof ScamServiceError) throw error;
-    if (error instanceof Error && error.name === 'AbortError') throw new ScamServiceError('Link verification timed out after 15 seconds.');
+    if (error instanceof Error && error.name === 'AbortError') throw new ScamServiceError('Link verification timed out after 30 seconds.');
     throw new ScamServiceError('Unable to reach the link verification service. Check the backend URL and Wi-Fi connection.');
   } finally { clearTimeout(timeout); }
 };

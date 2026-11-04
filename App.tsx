@@ -1,4 +1,8 @@
+import 'react-native-gesture-handler';
+import { enableScreens } from 'react-native-screens';
 import React from 'react';
+
+enableScreens(true);
 import { LogBox } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';

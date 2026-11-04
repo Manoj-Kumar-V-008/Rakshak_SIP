@@ -4,7 +4,7 @@ import { analyzeLocally } from './localEngine';
 import { useConfigStore } from '../../store/useConfigStore';
 
 export type AnalysisVia = 'server' | 'offline';
-export type AnalysisOutcome = { result: AnalysisResult; via: AnalysisVia };
+export type AnalysisOutcome = { result: AnalysisResult; via: AnalysisVia; serverError?: string };
 
 export const analyze = async (text: string): Promise<AnalysisOutcome> => {
   if (useConfigStore.getState().engineMode === 'offline') return { result: analyzeLocally(text), via: 'offline' };
@@ -13,12 +13,12 @@ export const analyze = async (text: string): Promise<AnalysisOutcome> => {
   } catch (error) {
     if (!(error instanceof ScamServiceError)) throw error;
     const result = analyzeLocally(text);
-    return { result, via: 'offline' };
+    return { result, via: 'offline', serverError: error.message };
   }
 };
 
 export type LinkVia = 'server' | 'offline';
-export type LinkOutcome = { result: LinkAnalysisResponse; via: LinkVia };
+export type LinkOutcome = { result: LinkAnalysisResponse; via: LinkVia; serverError?: string };
 
 export type { LinkAnalysisResponse, LinkVerdict };
 
@@ -86,6 +86,6 @@ export const verifyLink = async (text: string): Promise<LinkOutcome> => {
   } catch (error) {
     if (!(error instanceof ScamServiceError)) throw error;
     const result = offlineLinkCheck(text);
-    return { result, via: 'offline' };
+    return { result, via: 'offline', serverError: error.message };
   }
 };
