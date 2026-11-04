@@ -5,61 +5,41 @@ import { useNavigation, CommonActions } from '@react-navigation/native';
 import { useConfigStore } from '../../store/useConfigStore';
 import { AppTheme } from '../../theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { setupPushNotifications } from '../../services/notifications/notificationService';
 
 export const SplashScreen: React.FC = () => {
   const theme = useTheme() as AppTheme;
   const navigation = useNavigation();
   const onboardingCompleted = useConfigStore((state) => state.profile.onboardingCompleted);
-  const notificationEnabled = useConfigStore((state) => state.notificationEnabled);
 
   useEffect(() => {
-    const initializeApp = async () => {
-      // Register for push notifications if enabled.
-      if (notificationEnabled) {
-        try {
-          await setupPushNotifications();
-        } catch {
-          // Silent failure - app works without push notifications.
-        }
+    const timer = setTimeout(() => {
+      if (onboardingCompleted) {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'App' }],
+          })
+        );
+      } else {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Onboarding' }],
+          })
+        );
       }
+    }, 1500);
 
-      setTimeout(() => {
-        if (onboardingCompleted) {
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 0,
-              routes: [{ name: 'App' }],
-            })
-          );
-        } else {
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 0,
-              routes: [{ name: 'Onboarding' }],
-            })
-          );
-        }
-      }, 1500); // 1.5 seconds loading time for visual transition
-    };
-
-    initializeApp();
-
-    return () => {
-      // No cleanup needed for async function.
-    };
-  }, [onboardingCompleted, navigation, notificationEnabled]);
+    return () => clearTimeout(timer);
+  }, [onboardingCompleted, navigation]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {/* Visual Logo Group (20% real estate) */}
       <View style={styles.logoGroup}>
         <View style={[styles.logoIconBg, { backgroundColor: theme.colors.surfaceContainer }]}>
           <MaterialCommunityIcons name="shield-check" size={72} color={theme.colors.primary} />
         </View>
       </View>
-
-      {/* App Branding & Tagline (10% real estate) */}
       <View style={styles.brandGroup}>
         <Text style={[styles.brandText, theme.fonts.display, { color: theme.colors.textPrimary }]}>
           RAKSHAK AI
@@ -68,13 +48,9 @@ export const SplashScreen: React.FC = () => {
           Your Intelligent Guardian Against Digital Fraud
         </Text>
       </View>
-
-      {/* Activity Indicator (10% real estate) */}
       <View style={styles.indicatorGroup}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
-
-      {/* Security Tagline / Footnote (50% real estate) */}
       <View style={styles.footnoteGroup}>
         <View style={[styles.badgeContainer, { backgroundColor: theme.colors.surfaceContainer }]}>
           <MaterialCommunityIcons name="lock-outline" size={14} color={theme.colors.safe} />

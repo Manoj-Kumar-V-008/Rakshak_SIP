@@ -42,7 +42,8 @@
     "destination": "Destination",
     "sampleMessages": "Sample messages",
     "scanVoice": "Scan voice clip instead",
-    "scanSms": "Scan SMS instead"
+    "scanSms": "Scan SMS instead",
+    "scanFile": "Scan file instead"
   },
 
   "sms": {

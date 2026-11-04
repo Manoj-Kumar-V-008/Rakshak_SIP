@@ -8,9 +8,13 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useConfigStore } from './src/store/useConfigStore';
 import { lightTheme, darkTheme } from './src/theme';
 import { NavigationRouter } from './src/navigation';
+import { AuthProvider } from './src/context/AuthContext';
 
 // Dev-only noise from @react-navigation/stack v6 on new RN. Harmless; hidden for clean demos.
-LogBox.ignoreLogs(['InteractionManager has been deprecated']);
+LogBox.ignoreLogs([
+  'InteractionManager has been deprecated',
+  /InteractionManager has been deprecated/,
+]);
 
 export default function App() {
   const isDarkMode = useConfigStore((state) => state.isDarkMode);
@@ -20,10 +24,12 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <PaperProvider theme={activeTheme}>
-          <NavigationContainer>
-            <NavigationRouter />
-            <StatusBar style={isDarkMode ? 'light' : 'dark'} />
-          </NavigationContainer>
+          <AuthProvider>
+            <NavigationContainer>
+              <NavigationRouter />
+              <StatusBar style={isDarkMode ? 'light' : 'dark'} />
+            </NavigationContainer>
+          </AuthProvider>
         </PaperProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

@@ -45,7 +45,7 @@ def _transcribe_gemini(path: Path) -> str:
     api_key = os.getenv("RAKSHAK_LLM_API_KEY", "")
     # Default matches the app explainer model, which is known-accessible.
     # The 2.x models 404 for keys without prior 2.x usage.
-    model = os.getenv("RAKSHAK_TRANSCRIBE_MODEL", "gemini-3.5-flash-lite")
+    model = os.getenv("RAKSHAK_TRANSCRIBE_MODEL", "gemini-1.5-flash")
     raw = path.read_bytes()
     b64 = base64.b64encode(raw).decode()
     mime = _MIME.get(path.suffix.lower(), "audio/mp4")

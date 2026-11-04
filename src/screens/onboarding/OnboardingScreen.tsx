@@ -20,10 +20,11 @@ import { AppTheme } from '../../theme';
 import { CustomButton } from '../../components/common/CustomButton';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useConfigStore } from '../../store/useConfigStore';
+import { Language } from '../../locales';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-type LanguageType = 'en' | 'hi' | 'ta' | 'te' | 'kn';
+type LanguageType = Language;
 
 interface LanguageOption {
   label: string;
@@ -33,7 +34,7 @@ interface LanguageOption {
 
 export const OnboardingScreen: React.FC = () => {
   const theme = useTheme() as AppTheme;
-  const navigation = useNavigation();
+  const navigation = useNavigation() as any;
   const completeOnboarding = useConfigStore((state) => state.completeOnboarding);
   const updateProfile = useConfigStore((state) => state.updateProfile);
 
@@ -56,8 +57,10 @@ export const OnboardingScreen: React.FC = () => {
     { label: 'English', nativeLabel: 'English', code: 'en' },
     { label: 'Hindi', nativeLabel: 'हिन्दी', code: 'hi' },
     { label: 'Tamil', nativeLabel: 'தமிழ்', code: 'ta' },
-    { label: 'Telugu', nativeLabel: 'ತೆಲುಗು', code: 'te' },
+    { label: 'Telugu', nativeLabel: 'తెలుగు', code: 'te' },
     { label: 'Kannada', nativeLabel: 'ಕನ್ನಡ', code: 'kn' },
+    { label: 'Marathi', nativeLabel: 'मराठी', code: 'mr' },
+    { label: 'Bengali', nativeLabel: 'বাংলা', code: 'bn' },
   ];
 
   // Scroll handler to track the page dots dynamically
@@ -134,7 +137,8 @@ export const OnboardingScreen: React.FC = () => {
 
     completeOnboarding(trimmedName, selectedLanguage, trimmedPhone, userCategory, trimmedEmergName, trimmedEmergPhone);
 
-    navigation.dispatch(
+    const parentNav = navigation.getParent() || navigation;
+    parentNav.dispatch(
       CommonActions.reset({
         index: 0,
         routes: [{ name: 'App' }],

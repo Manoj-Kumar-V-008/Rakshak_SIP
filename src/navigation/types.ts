@@ -24,6 +24,7 @@ export type RootStackParamList = {
   };
   VoiceScanner: undefined;
   SMSScreen: undefined;
+  FileScanner: undefined;
   ScamDetails: {
     scamId: string;
     title: string;

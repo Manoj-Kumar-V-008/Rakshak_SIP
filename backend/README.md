@@ -24,7 +24,7 @@ Without a key the server is rules-only, so server and offline scores match. Set 
 # Gemini (free at https://aistudio.google.com/app/apikey)
 $env:RAKSHAK_LLM_PROVIDER="gemini"
 $env:RAKSHAK_LLM_API_KEY="AIza..."
-# optional: $env:RAKSHAK_LLM_MODEL="gemini-3.5-flash-lite"
+# optional: $env:RAKSHAK_LLM_MODEL="gemini-1.5-flash"
 
 # or NVIDIA NIM (https://build.nvidia.com)
 $env:RAKSHAK_LLM_PROVIDER="nim"

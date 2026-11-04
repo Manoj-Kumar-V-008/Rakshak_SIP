@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { useConfigStore } from '../store/useConfigStore';
-import { reportScamLink, fetchScamLinkBlocklist } from '../services/api/scamService';
 
 const TOKEN_KEY = 'rakshak_auth_token';
 const USER_KEY = 'rakshak_auth_user';

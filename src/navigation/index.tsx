@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTheme } from 'react-native-paper';
@@ -15,9 +15,10 @@ import { ScamAnalysisResultScreen } from '../screens/analysis/ScamAnalysisResult
 import { AdminSettingsScreen } from '../screens/settings/AdminSettingsScreen';
 import { VoiceScannerScreen } from '../screens/scanner/VoiceScannerScreen';
 import { SMSScreen } from '../screens/scanner/SMSScreen';
+import { FileScannerScreen } from '../screens/scanner/FileScannerScreen';
 import { LoginScreen } from '../screens/auth/LoginScreen';
 import { RegisterScreen } from '../screens/auth/RegisterScreen';
-import { AuthProvider, useAuth } from '../context/AuthContext';
+import { LearnScreen } from '../screens/education/LearnScreen';
 
 // --- NAVIGATOR CREATIONS ---
 const RootStack = createStackNavigator<RootStackParamList>();
@@ -88,7 +89,7 @@ const AppNavigator = () => {
       />
       <AppTabs.Screen
         name="KnowledgeTab"
-        component={DashboardScreen}
+        component={LearnScreen}
         options={{ tabBarLabel: 'Learn' }}
       />
       <AppTabs.Screen
@@ -100,75 +101,29 @@ const AppNavigator = () => {
   );
 };
 
-// Auth Stack (Login / Register)
-const AuthStackNavigator = () => {
+// Root Router Entry
+export const NavigationRouter = () => {
   const theme = useTheme() as AppTheme;
+
   return (
     <RootStack.Navigator
+      initialRouteName="Splash"
       screenOptions={{
         headerShown: false,
         cardStyle: { backgroundColor: theme.colors.background },
       }}
     >
+      <RootStack.Screen name="Splash" component={SplashScreen} />
+      <RootStack.Screen name="Onboarding" component={OnboardingNavigator} />
+      <RootStack.Screen name="App" component={AppNavigator} />
+      <RootStack.Screen name="ScamAnalysisResult" component={ScamAnalysisResultScreen} />
+      <RootStack.Screen name="VoiceScanner" component={VoiceScannerScreen} />
+      <RootStack.Screen name="SMSScreen" component={SMSScreen} />
+      <RootStack.Screen name="FileScanner" component={FileScannerScreen} />
+      <RootStack.Screen name="AdminSettings" component={AdminSettingsScreen} />
       <RootStack.Screen name="Login" component={LoginScreen} />
       <RootStack.Screen name="Register" component={RegisterScreen} />
     </RootStack.Navigator>
-  );
-};
-
-// Root Router Entry
-export const NavigationRouter = () => {
-  const theme = useTheme() as AppTheme;
-  const { isLoading, isAuthenticated } = useAuth();
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    if (!isLoading) {
-      setReady(true);
-    }
-  }, [isLoading]);
-
-  // While hydrating auth state, show splash.
-  if (!ready) {
-    return (
-      <RootStack.Navigator
-        screenOptions={{
-          headerShown: false,
-          cardStyle: { backgroundColor: theme.colors.background },
-        }}
-      >
-        <RootStack.Screen name="Splash" component={SplashScreen} />
-      </RootStack.Navigator>
-    );
-  }
-
-  return (
-    <AuthProvider>
-      <RootStack.Navigator
-        initialRouteName={isAuthenticated ? 'App' : 'Login'}
-        screenOptions={{
-          headerShown: false,
-          cardStyle: { backgroundColor: theme.colors.background },
-        }}
-      >
-        <RootStack.Screen name="Splash" component={SplashScreen} />
-        <RootStack.Screen name="Onboarding" component={OnboardingNavigator} />
-        {isAuthenticated ? (
-          <>
-            <RootStack.Screen name="App" component={AppNavigator} />
-            <RootStack.Screen name="ScamAnalysisResult" component={ScamAnalysisResultScreen} />
-            <RootStack.Screen name="VoiceScanner" component={VoiceScannerScreen} />
-            <RootStack.Screen name="SMSScreen" component={SMSScreen} />
-            <RootStack.Screen name="AdminSettings" component={AdminSettingsScreen} />
-          </>
-        ) : (
-          <>
-            <RootStack.Screen name="Login" component={LoginScreen} />
-            <RootStack.Screen name="Register" component={RegisterScreen} />
-          </>
-        )}
-      </RootStack.Navigator>
-    </AuthProvider>
   );
 };
 
