@@ -23,7 +23,7 @@ import { useConfigStore } from '../../store/useConfigStore';
 import { analyze, verifyLink, type LinkAnalysisResponse } from '../../services/engine/analyze';
 import { reportScamLink } from '../../services/api/scamService';
 import { useRemoteRules } from '../../hooks/useRemoteRules';
-import { t, setLanguage, getLanguage } from '../../locales';
+import { t, setLanguage } from '../../locales';
 import { Language } from '../../locales';
 import { Card } from '../../components/common/Card';
 
@@ -189,7 +189,7 @@ export const ScannerScreen: React.FC = () => {
             <View style={styles.langRow}>
               <Text style={[styles.langLabel, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>{t('profile.language')}:</Text>
               <TouchableOpacity onPress={handleLanguageChange} style={styles.langBtn}>
-                <Text style={[styles.langValue, theme.fonts.bodyMedium, { color: theme.colors.primary }]}>{langLabel(currentLang === 'en' ? 'hi' : 'en')}</Text>
+                <Text style={[styles.langValue, theme.fonts.bodyMedium, { color: theme.colors.primary }]}>{langLabel(currentLang)} ▾</Text>
               </TouchableOpacity>
             </View>
 
@@ -348,7 +348,6 @@ const styles = StyleSheet.create({
   inputContainer: { borderWidth: 1.5, borderRadius: 14, padding: 14, minHeight: 150, marginBottom: 16 },
   input: { flex: 1, textAlignVertical: 'top', fontSize: 15, lineHeight: 22 },
   clearBtn: { position: 'absolute', bottom: 14, right: 14 },
-  consoleViewer: { backgroundColor: '#0F172A', borderColor: '#334155', borderWidth: 1, borderRadius: 12, padding: 12, marginBottom: 16 },
   consoleHeader: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#334155', paddingBottom: 6, marginBottom: 8 },
   spinner: { marginRight: 8 },
   consoleHeaderTitle: { fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', color: '#94A3B8', fontWeight: '700', fontSize: 11, letterSpacing: 0.5 },

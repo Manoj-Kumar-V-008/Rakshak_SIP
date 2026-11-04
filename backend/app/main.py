@@ -27,9 +27,9 @@ async def lifespan(_: FastAPI):
 app = FastAPI(title="Rakshak AI API", version="0.1.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Local evaluation prototype; restrict this before deployment.
-    allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type"],
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 app.include_router(feedback_router)
 app.include_router(audio_router)

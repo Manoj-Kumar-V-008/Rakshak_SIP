@@ -6,17 +6,12 @@ import { Header } from '../../components/common/Header';
 import { CustomButton } from '../../components/common/CustomButton';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { Card } from '../../components/common/Card';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { useNavigation } from '@react-navigation/native';
-import { RootStackParamList } from '../../navigation/types';
 import { useConfigStore } from '../../store/useConfigStore';
 import { analyze } from '../../services/engine/analyze';
 import { AnalysisResult } from '../../types/analysis';
 import { t } from '../../locales';
 import * as Speech from 'expo-speech';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
-type NavigationProp = StackNavigationProp<RootStackParamList, 'App'>;
 
 const smsTemplates = [
   { label: 'Bank KYC Scam', sender: 'SBIBNK', text: 'Dear customer, your SBI account will be blocked today. Update KYC immediately at http://sbi-kyc-update.xyz and share your OTP.' },
@@ -27,7 +22,6 @@ const smsTemplates = [
 
 export const SMSScreen: React.FC = () => {
   const theme = useTheme() as AppTheme;
-  const navigation = useNavigation<NavigationProp>();
   const addSmsRecord = useConfigStore((state) => state.addSmsRecord);
   const [sender, setSender] = useState('');
   const [message, setMessage] = useState('');

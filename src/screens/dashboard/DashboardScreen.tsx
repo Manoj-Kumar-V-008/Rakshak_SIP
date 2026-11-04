@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert, Platform, ImageBackground } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { AppTheme } from '../../theme';
 import { Header } from '../../components/common/Header';
@@ -7,8 +7,7 @@ import { StatusBadge } from '../../components/common/StatusBadge';
 import { Card } from '../../components/common/Card';
 import { useConfigStore } from '../../store/useConfigStore';
 import { callCybercrimeHelpline } from '../../utils/callHelpline';
-import { t } from '../../locales';
-import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
 export const DashboardScreen: React.FC = () => {
@@ -18,8 +17,6 @@ export const DashboardScreen: React.FC = () => {
   const scansHistory = useConfigStore((state) => state.scansHistory);
   const linkHistory = useConfigStore((state) => state.linkHistory);
   const smsHistory = useConfigStore((state) => state.smsHistory);
-  const engineMode = useConfigStore((state) => state.engineMode);
-  const backendUrl = useConfigStore((state) => state.backendUrl);
   const highRisk = scansHistory.filter((s) => s.score > 60).length;
   const safeCount = scansHistory.filter((s) => s.score <= 20).length;
   const suspiciousCount = scansHistory.filter((s) => s.score > 20 && s.score <= 60).length;
@@ -146,7 +143,6 @@ export const DashboardScreen: React.FC = () => {
         ) : (
           <View style={styles.historyList}>
             {linkHistory.map((item) => {
-              const risk = getRiskProps(item.riskScore);
               return (
                 <TouchableOpacity
                   key={item.id}
@@ -182,7 +178,6 @@ export const DashboardScreen: React.FC = () => {
         ) : (
           <View style={styles.historyList}>
             {smsHistory.map((item) => {
-              const risk = getRiskProps(item.score);
               return (
                 <TouchableOpacity
                   key={item.id}
@@ -209,7 +204,6 @@ export const DashboardScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  flex: { flex: 1 },
   scrollContent: { padding: 16, paddingBottom: 40 },
   sectionTitle: { fontWeight: '700', marginBottom: 12 },
   bannerContent: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

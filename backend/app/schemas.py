@@ -131,7 +131,7 @@ class ReportedLinkEntry(BaseModel):
 class FileAnalysisRequest(BaseModel):
     fileName: str = Field(min_length=1, max_length=255)
     fileContentBase64: str = Field(min_length=1)  # base64-encoded file contents
-    maxSizeBytes: int = Field(default=10_000_000)  # 10MB default limit
+    maxSizeBytes: int = Field(default=25_000_000)  # 25MB default limit
 
 
 class FileVerdict(BaseModel):

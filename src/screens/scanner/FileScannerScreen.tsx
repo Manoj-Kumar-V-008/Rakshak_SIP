@@ -8,7 +8,7 @@ import { StatusBadge } from '../../components/common/StatusBadge';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { useConfigStore } from '../../store/useConfigStore';
 import { analyzeFile, type FileAnalysisResponse } from '../../services/api/fileService';
 import { t } from '../../locales';
@@ -53,8 +53,13 @@ export const FileScannerScreen: React.FC = () => {
     setLoading(true);
     setFileResult(null);
     try {
-      const base64 = await readFileAsBase64(selectedFile.uri);
-      const result = await analyzeFile(selectedFile.name, base64);
+      let base64 = '';
+      try {
+        base64 = await readFileAsBase64(selectedFile.uri);
+      } catch {
+        // If file is too large for base64 in memory, analyze with filename and size
+      }
+      const { result, via } = await analyzeFile(selectedFile.name, base64, selectedFile.size);
       setFileResult(result);
       addFileRecord({
         fileName: result.fileName,
@@ -64,6 +69,9 @@ export const FileScannerScreen: React.FC = () => {
         riskScore: result.verdict.riskScore,
         reasons: result.verdict.reasons,
       });
+      if (via === 'offline') {
+        Alert.alert('Offline Mode', 'The backend was unavailable. Evaluated file security using on-device heuristics.');
+      }
     } catch (error) {
       Alert.alert('File scan failed', error instanceof Error ? error.message : 'Unknown error.');
     } finally { setLoading(false); }
@@ -146,7 +154,7 @@ export const FileScannerScreen: React.FC = () => {
           )}
 
           <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary, marginTop: 24 }]}>About File Scanning</Text>
-          <Text style={[styles.instruction, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>We compute a SHA-256 hash of the file locally and check it against VirusTotal's threat database. The full file content is never uploaded — only the hash is sent.</Text>
+          <Text style={[styles.instruction, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>We compute a SHA-256 hash of the file locally and check it against VirusTotal&apos;s threat database. The full file content is never uploaded — only the hash is sent.</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
