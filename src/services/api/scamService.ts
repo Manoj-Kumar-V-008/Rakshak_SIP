@@ -91,7 +91,15 @@ export const analyzeAudio = async (uri: string, fileName = 'clip.m4a'): Promise<
   return Promise.race([upload, timeout]);
 };
 
-export type HealthStatus = { status: string; engine: string; rulesVersion: string };
+export type HealthStatus = {
+  status: string;
+  engine: string;
+  rulesVersion: string;
+  llm?: string;
+  semantic?: string;
+  safeBrowsing?: string;
+  virustotal?: string;
+};
 
 export const fetchRules = async (): Promise<unknown> => {
   const baseUrl = baseUrlFor(useConfigStore.getState().backendUrl);

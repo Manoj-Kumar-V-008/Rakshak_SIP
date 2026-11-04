@@ -41,7 +41,8 @@ export const AdminSettingsScreen: React.FC = () => {
     try {
       const health = await checkHealth(url);
       setBackendUrl(url);
-      setStatus(`Connected · ${health.engine} · rules v${health.rulesVersion}`);
+      const llmInfo = health.llm === 'ready' ? 'LLM: ready' : 'LLM: off (needs RAKSHAK_LLM_API_KEY)';
+      setStatus(`Connected · ${health.engine} · rules v${health.rulesVersion} · ${llmInfo}`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Unable to test the connection.');
     } finally { setTesting(false); }

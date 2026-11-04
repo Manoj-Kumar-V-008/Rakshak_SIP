@@ -250,7 +250,8 @@ export const ProfileScreen: React.FC = () => {
         
         <View style={[styles.settingsGroup, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
           {/* Preferred Language */}
-          <TouchableOpacity onPress={handleLanguageChange} style={styles.settingsItem}>            <Ionicons name="language-outline" size={20} color={theme.colors.primary} style={styles.itemIcon} />
+          <TouchableOpacity onPress={handleLanguageChange} style={styles.settingsItem}>
+            <Ionicons name="language-outline" size={20} color={theme.colors.primary} style={styles.itemIcon} />
             <View style={styles.itemTextContainer}>
               <Text style={[styles.itemLabel, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>
                 Preferred Language
@@ -467,7 +468,7 @@ export const ProfileScreen: React.FC = () => {
                     {log}
                   </Text>
                 ))}
-                {executing && <ActivityIndicator size="small" color={theme.colors.primary} style={{ marginTop: 6, alignSelf: 'flex-start' }} />}
+                {executing ? <ActivityIndicator size="small" color={theme.colors.primary} style={{ marginTop: 6, alignSelf: 'flex-start' }} /> : null}
               </View>
 
               {/* SQL Results Grid Table */}

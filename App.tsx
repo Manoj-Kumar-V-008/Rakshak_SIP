@@ -9,6 +9,7 @@ import { useConfigStore } from './src/store/useConfigStore';
 import { lightTheme, darkTheme } from './src/theme';
 import { NavigationRouter } from './src/navigation';
 import { AuthProvider } from './src/context/AuthContext';
+import { setLanguage } from './src/locales';
 
 // Dev-only noise from @react-navigation/stack v6 on new RN. Harmless; hidden for clean demos.
 LogBox.ignoreLogs([
@@ -18,7 +19,14 @@ LogBox.ignoreLogs([
 
 export default function App() {
   const isDarkMode = useConfigStore((state) => state.isDarkMode);
+  const preferredLanguage = useConfigStore((state) => state.profile.preferredLanguage);
   const activeTheme = isDarkMode ? darkTheme : lightTheme;
+
+  React.useEffect(() => {
+    if (preferredLanguage) {
+      setLanguage(preferredLanguage);
+    }
+  }, [preferredLanguage]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
