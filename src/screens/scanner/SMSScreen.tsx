@@ -99,12 +99,12 @@ export const SMSScreen: React.FC = () => {
               maxLength={1000}
               editable={!loading}
             />
-            {message.length > 0 && !loading && <TouchableOpacity onPress={() => setMessage('')} style={styles.clearBtn}><MaterialCommunityIcons name="close-circle" size={18} color={theme.colors.textMuted} /></TouchableOpacity>}
+            {message.length > 0 && !loading ? <TouchableOpacity onPress={() => setMessage('')} style={styles.clearBtn}><MaterialCommunityIcons name="close-circle" size={18} color={theme.colors.textMuted} /></TouchableOpacity> : null}
           </View>
 
           <CustomButton title={loading ? t('common.scanning') : t('sms.scanSms')} onPress={handleScanSms} variant="primary" disabled={loading || message.trim().length < 5} style={styles.ctaButton} />
 
-          {smsResult && (
+          {smsResult ? (
             <Card padding={20} radius={20} elevation={3} marginTop={16}>
               <View style={[styles.resultHeader, { borderLeftWidth: 4, borderLeftColor: levelColor(smsResult.level) }]}>
                 <View style={styles.resultInfo}>
@@ -144,10 +144,10 @@ export const SMSScreen: React.FC = () => {
                   </View>
                 ))}
               </View>
-              {smsResult.level !== 'safe' && <CustomButton title="Call Cybercrime Helpline · 1930" onPress={() => Alert.alert('Call 1930', 'Dialing cybercrime helpline...')} variant="danger" style={[styles.helplineButton, { marginTop: 12 }]} />}
+              {smsResult.level !== 'safe' ? <CustomButton title="Call Cybercrime Helpline · 1930" onPress={() => Alert.alert('Call 1930', 'Dialing cybercrime helpline...')} variant="danger" style={[styles.helplineButton, { marginTop: 12 }]} /> : null}
               <CustomButton title="Hear warning aloud" onPress={hearWarning} variant="outline" style={[styles.helplineButton, { marginTop: 12 }]} />
             </Card>
-          )}
+          ) : null}
 
           <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary, marginTop: 24 }]}>Sample SMS</Text>
           <View style={styles.templatesGroup}>

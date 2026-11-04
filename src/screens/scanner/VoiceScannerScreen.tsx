@@ -181,24 +181,30 @@ export const VoiceScannerScreen: React.FC = () => {
           style={styles.button}
         />
         <CustomButton title="Pick audio file" onPress={handlePickFile} variant="outline" disabled={busy || recorderState.isRecording} style={styles.button} />
-        {liveScore !== null && (
+        {liveScore !== null ? (
           <View style={[styles.meterCard, { borderColor: theme.colors.outline, backgroundColor: theme.colors.surface }]}>
-            <Text style={[theme.fonts.caption, { color: theme.colors.textSecondary }]}>LIVE RISK · {chunks} chunk{chunks === 1 ? '' : 's'} · offline rules on partial transcript</Text>
+            <Text style={[theme.fonts.caption, { color: theme.colors.textSecondary }]}>
+              {`LIVE RISK · ${chunks} chunk${chunks === 1 ? '' : 's'} · offline rules on partial transcript`}
+            </Text>
             <Text style={[theme.fonts.h3, { color: liveLevel === 'danger' ? theme.colors.danger : liveLevel === 'suspicious' ? theme.colors.warning : theme.colors.safe }]}>
-              {liveScore} / 100 ({liveLevel})
+              {`${liveScore} / 100 (${liveLevel})`}
             </Text>
             <View style={styles.meterTrack}>
               <View style={[styles.meterFill, { width: `${Math.min(100, Math.max(0, liveScore))}%`, backgroundColor: liveLevel === 'danger' ? theme.colors.danger : liveLevel === 'suspicious' ? theme.colors.warning : theme.colors.safe }]} />
             </View>
-            {rollingTranscript ? <Text style={[theme.fonts.bodySmall, { color: theme.colors.textSecondary, marginTop: 8 }]}>{rollingTranscript.slice(-200)}</Text> : null}
+            {rollingTranscript ? (
+              <Text style={[theme.fonts.bodySmall, { color: theme.colors.textSecondary, marginTop: 8 }]}>
+                {rollingTranscript.slice(-200)}
+              </Text>
+            ) : null}
           </View>
-        )}
-        {(busy || status) && (
+        ) : null}
+        {busy || (status !== null && status.length > 0) ? (
           <View style={styles.statusCard}>
-            {busy && <ActivityIndicator size="small" color={theme.colors.primary} style={styles.spinner} />}
-            <Text style={[theme.fonts.bodySmall, { color: theme.colors.textPrimary }]}>{status}</Text>
+            {busy ? <ActivityIndicator size="small" color={theme.colors.primary} style={styles.spinner} /> : null}
+            {status ? <Text style={[theme.fonts.bodySmall, { color: theme.colors.textPrimary }]}>{status}</Text> : null}
           </View>
-        )}
+        ) : null}
       </ScrollView>
     </View>
   );

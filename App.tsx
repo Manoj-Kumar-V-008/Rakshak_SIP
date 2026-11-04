@@ -25,9 +25,9 @@ export default function App() {
       <SafeAreaProvider>
         <PaperProvider theme={activeTheme}>
           <AuthProvider>
+            <StatusBar style={isDarkMode ? 'light' : 'dark'} />
             <NavigationContainer>
               <NavigationRouter />
-              <StatusBar style={isDarkMode ? 'light' : 'dark'} />
             </NavigationContainer>
           </AuthProvider>
         </PaperProvider>

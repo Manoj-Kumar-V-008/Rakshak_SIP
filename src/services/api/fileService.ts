@@ -1,8 +1,21 @@
 import { useConfigStore } from '../../store/useConfigStore';
+import { FileSystemUploadType, uploadAsync } from 'expo-file-system/legacy';
 
 export class FileServiceError extends Error {}
 
 const baseUrlFor = (url: string) => url.trim().replace(/\/$/, '').replace(/\/api\/v1$/, '');
+
+const mimeFor = (fileName: string): string => {
+  const ext = fileName.split('.').pop()?.toLowerCase();
+  switch (ext) {
+    case 'apk': return 'application/vnd.android.package-archive';
+    case 'zip': return 'application/zip';
+    case 'pdf': return 'application/pdf';
+    case 'exe': return 'application/x-msdownload';
+    case 'rar': return 'application/x-rar-compressed';
+    default: return 'application/octet-stream';
+  }
+};
 
 export interface FileVerdict {
   verdict: 'safe' | 'suspicious' | 'danger' | 'unknown';
@@ -93,8 +106,8 @@ export const offlineFileCheck = (
 };
 
 export const analyzeFile = async (
+  fileUri: string,
   fileName: string,
-  fileContentBase64: string,
   fileSizeBytes: number = 0
 ): Promise<FileAnalysisOutcome> => {
   const engineMode = useConfigStore.getState().engineMode;
@@ -103,26 +116,28 @@ export const analyzeFile = async (
   }
 
   const baseUrl = baseUrlFor(useConfigStore.getState().backendUrl);
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 12_000);
   try {
-    const response = await fetch(`${baseUrl}/v1/analyze/file`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fileName,
-        fileContentBase64,
-      }),
-      signal: controller.signal,
+    const uploadPromise = uploadAsync(`${baseUrl}/v1/analyze/file`, fileUri, {
+      httpMethod: 'POST',
+      uploadType: FileSystemUploadType.MULTIPART,
+      fieldName: 'file',
+      mimeType: mimeFor(fileName),
+    }).then((response) => {
+      if (response.status < 200 || response.status >= 300) {
+        throw new FileServiceError(`File analysis returned ${response.status}. ${response.body.slice(0, 150)}`);
+      }
+      return JSON.parse(response.body) as FileAnalysisResponse;
     });
-    if (!response.ok) throw new FileServiceError(`File analysis returned ${response.status}.`);
-    const result = (await response.json()) as FileAnalysisResponse;
+
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new FileServiceError('File analysis timed out after 30 seconds.')), 30_000)
+    );
+
+    const result = await Promise.race([uploadPromise, timeoutPromise]);
     return { result, via: 'server' };
   } catch (error) {
     // If backend unreachable or timed out, gracefully fallback to on-device heuristic scanning
     const offlineResult = offlineFileCheck(fileName, fileSizeBytes);
     return { result: offlineResult, via: 'offline' };
-  } finally {
-    clearTimeout(timeout);
   }
 };

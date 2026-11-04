@@ -178,11 +178,11 @@ export const ScannerScreen: React.FC = () => {
                 maxLength={1000}
                 editable={!loading}
               />
-              {message.length > 0 && !loading && (
+              {message.length > 0 && !loading ? (
                 <TouchableOpacity onPress={() => setMessage('')} style={styles.clearBtn}>
                   <MaterialCommunityIcons name="close-circle" size={20} color={theme.colors.textMuted} />
                 </TouchableOpacity>
-              )}
+              ) : null}
             </View>
 
             {/* Language toggle */}
@@ -220,11 +220,11 @@ export const ScannerScreen: React.FC = () => {
                 maxLength={500}
                 editable={!linkLoading}
               />
-              {linkInput.length > 0 && !linkLoading && (
+              {linkInput.length > 0 && !linkLoading ? (
                 <TouchableOpacity onPress={() => setLinkInput('')} style={styles.clearBtn}>
                   <MaterialCommunityIcons name="close-circle" size={20} color={theme.colors.textMuted} />
                 </TouchableOpacity>
-              )}
+              ) : null}
             </View>
             <CustomButton
               title={linkLoading ? t('common.verifying') : t('scanner.verifyLinkButton')}
@@ -234,7 +234,7 @@ export const ScannerScreen: React.FC = () => {
               style={styles.ctaButton}
             />
 
-            {linkResult && (
+            {linkResult ? (
               <View style={[styles.linkResultCard, { borderLeftWidth: 4, borderLeftColor: verdictColor(linkResult.overallVerdict) }]}>
                 <View style={styles.linkResultHeader}>
                   <Text style={[styles.verdictLabel, theme.fonts.h3, { color: verdictColor(linkResult.overallVerdict), fontWeight: '800' }]}>{verdictLabel(linkResult.overallVerdict)}</Text>
@@ -244,24 +244,24 @@ export const ScannerScreen: React.FC = () => {
                   <View key={idx} style={styles.urlItem}>
                     <Text style={[styles.urlLabel, theme.fonts.caption, { color: theme.colors.textSecondary }]}>Original</Text>
                     <Text style={[styles.urlText, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>{url.original}</Text>
-                    {url.expanded && (
+                    {url.expanded ? (
                       <>
                         <Text style={[styles.urlLabel, theme.fonts.caption, { color: theme.colors.textSecondary }]}>Destination</Text>
                         <Text style={[styles.urlText, theme.fonts.bodyMedium, { color: theme.colors.primary }]}>{url.expanded}</Text>
                       </>
-                    )}
+                    ) : null}
                     <View style={styles.urlBadges}>
-                      {url.domain && <Text style={[styles.badge, { backgroundColor: theme.colors.primaryContainer }]}>{url.domain}</Text>}
+                      {url.domain ? <Text style={[styles.badge, { backgroundColor: theme.colors.primaryContainer }]}>{url.domain}</Text> : null}
                       <Text style={[styles.badge, { backgroundColor: url.isHttps ? theme.colors.safeContainer : theme.colors.dangerContainer, color: url.isHttps ? theme.colors.safe : theme.colors.danger }]}>{url.isHttps ? 'HTTPS' : 'HTTP'}</Text>
-                      {url.reputation && <Text style={[styles.badge, { backgroundColor: theme.colors.dangerContainer, color: theme.colors.danger }]}>REPUTATION: {url.reputation.threatType}</Text>}
-                      {url.reasons.length > 0 && <Text style={[styles.badge, { backgroundColor: theme.colors.dangerContainer, color: theme.colors.danger }]}>{url.reasons.join(', ')}</Text>}
+                      {url.reputation ? <Text style={[styles.badge, { backgroundColor: theme.colors.dangerContainer, color: theme.colors.danger }]}>{`REPUTATION: ${url.reputation.threatType}`}</Text> : null}
+                      {url.reasons.length > 0 ? <Text style={[styles.badge, { backgroundColor: theme.colors.dangerContainer, color: theme.colors.danger }]}>{url.reasons.join(', ')}</Text> : null}
                     </View>
                   </View>
                 ))}
                 <View style={styles.linkResultFooter}>
                   <Text style={[styles.engineDetail, theme.fonts.caption, { color: theme.colors.textMuted }]}>{linkResult.engine.mode === 'offline-link' ? 'Offline · on-device heuristics' : linkResult.engine.mode === 'link-verifier+safebrowsing' ? 'Server · link verifier + Safe Browsing' : 'Server · link verifier'} · {linkResult.trace.map((t: { stage: string; ms: number; detail: string }) => t.detail).join(' | ')}</Text>
                 </View>
-                {linkResult.overallVerdict !== 'safe' && (
+                {linkResult.overallVerdict !== 'safe' ? (
                   <CustomButton
                     title={reportLinkBusy ? t('common.reporting') : t('common.reportScam')}
                     onPress={handleReportLink}
@@ -270,13 +270,13 @@ export const ScannerScreen: React.FC = () => {
                     disabled={reportLinkBusy}
                     style={[styles.ctaButton, { marginTop: 12 }]}
                   />
-                )}
+                ) : null}
               </View>
-            )}
+            ) : null}
           </Card>
 
           {/* Engine Trace */}
-          {(loading || consoleLogs.length > 0) && (
+          {loading || consoleLogs.length > 0 ? (
             <Card padding={16} radius={16} elevation={2} marginTop={16}>
               <View style={styles.consoleHeader}>
                 <ActivityIndicator size="small" color={theme.colors.primary} style={styles.spinner} />
@@ -286,7 +286,7 @@ export const ScannerScreen: React.FC = () => {
                 <Text key={log} style={[styles.logLine, { color: theme.colors.textSecondary }]}>{log}</Text>
               ))}
             </Card>
-          )}
+          ) : null}
 
           {/* Quick Actions */}
           <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary, marginTop: 16 }]}>Quick Actions</Text>
