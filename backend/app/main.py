@@ -49,12 +49,16 @@ def health() -> dict[str, object]:
     from app.pipeline import llm as llm_mod
     from app.pipeline import semantic as semantic_mod
 
+    llm_ready = llm_mod.is_available()
+    semantic_ready = semantic_mod.is_available()
+    engine_mode = "hybrid-llm" if llm_ready else ("hybrid" if semantic_ready else "rules-only")
+
     return {
         "status": "ok",
-        "engine": "rules-only",
+        "engine": engine_mode,
         "rulesVersion": RULES["version"],
-        "llm": "ready" if llm_mod.is_available() else "off",
-        "semantic": "ready" if semantic_mod.is_available() else "off",
+        "llm": "ready" if llm_ready else "off",
+        "semantic": "ready" if semantic_ready else "off",
         "safeBrowsing": "ready" if sb_is_available() else "off",
         "virustotal": "ready" if vt_is_available() else "off",
     }

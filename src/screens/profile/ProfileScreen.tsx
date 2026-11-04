@@ -250,7 +250,8 @@ export const ProfileScreen: React.FC = () => {
         
         <View style={[styles.settingsGroup, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
           {/* Preferred Language */}
-          <TouchableOpacity onPress={handleLanguageChange} style={styles.settingsItem}>            <Ionicons name="language-outline" size={20} color={theme.colors.primary} style={styles.itemIcon} />
+          <TouchableOpacity onPress={handleLanguageChange} style={styles.settingsItem}>
+            <Ionicons name="language-outline" size={20} color={theme.colors.primary} style={styles.itemIcon} />
             <View style={styles.itemTextContainer}>
               <Text style={[styles.itemLabel, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>
                 Preferred Language
@@ -402,7 +403,7 @@ export const ProfileScreen: React.FC = () => {
             />
           </TouchableOpacity>
           
-          {showDb && (
+          {showDb ? (
             <View style={styles.explorerContainer}>
               {/* SQLite stats block */}
               <View style={[styles.statsCard, { backgroundColor: theme.colors.surfaceContainer, borderColor: theme.colors.outline }]}>
@@ -467,7 +468,7 @@ export const ProfileScreen: React.FC = () => {
                     {log}
                   </Text>
                 ))}
-                {executing && <ActivityIndicator size="small" color={theme.colors.primary} style={{ marginTop: 6, alignSelf: 'flex-start' }} />}
+                {executing ? <ActivityIndicator size="small" color={theme.colors.primary} style={{ marginTop: 6, alignSelf: 'flex-start' }} /> : null}
               </View>
 
               {/* SQL Results Grid Table */}
@@ -520,7 +521,7 @@ export const ProfileScreen: React.FC = () => {
               </ScrollView>
 
               {/* Row Detail Inspector Card */}
-              {results.length > 0 && results[selectedRowIndex] && (
+              {results.length > 0 && results[selectedRowIndex] ? (
                 <View style={{ backgroundColor: theme.colors.surfaceContainer, borderColor: theme.colors.outline, borderWidth: 1.5, borderRadius: 12, padding: 14, marginTop: 4, marginBottom: 12 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
                     <MaterialCommunityIcons name="database-search" size={18} color={theme.colors.primary} style={{ marginRight: 6 }} />
@@ -541,9 +542,9 @@ export const ProfileScreen: React.FC = () => {
                     ))}
                   </View>
                 </View>
-              )}
+              ) : null}
             </View>
-          )}
+          ) : null}
         </View>
 
         {/* Reset Actions */}

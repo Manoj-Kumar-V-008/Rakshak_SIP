@@ -25,7 +25,7 @@ export const hasGeminiKey = async (): Promise<boolean> => {
 };
 
 // Opt-in only: sends the scanned text to Google Gemini. Never called without an explicit tap.
-const GEMINI_MODEL = 'gemini-1.5-flash';
+const GEMINI_MODEL = 'gemini-3.5-flash-lite';
 
 export const explainSimply = async (message: string, scamType: string, riskScore: number, indicators: string[]): Promise<string> => {
   const apiKey = await getGeminiKey();

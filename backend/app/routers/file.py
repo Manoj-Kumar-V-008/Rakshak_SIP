@@ -15,7 +15,7 @@ import hashlib
 import time
 from typing import Any, Literal
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, File, HTTPException, Request, UploadFile
 
 from app.pipeline.virustotal import check_hash, compute_sha256, is_available, verdict_from_vt
 from app.schemas import (
@@ -66,17 +66,33 @@ def _heuristic_verdict(file_name: str, file_size: int) -> FileVerdict:
 
 
 @router.post("/v1/analyze/file", response_model=FileAnalysisResult)
-async def analyze_file(request: FileAnalysisRequest) -> FileAnalysisResult:
+async def analyze_file(request: Request) -> FileAnalysisResult:
     started = time.perf_counter()
+    content_type = request.headers.get("content-type", "").lower()
 
-    # Decode base64 content.
-    try:
-        file_bytes = base64.b64decode(request.fileContentBase64)
-    except Exception as exc:
-        raise HTTPException(
-            status_code=422,
-            detail=f"Invalid base64 content: {str(exc)}",
-        )
+    if "multipart/form-data" in content_type:
+        form = await request.form()
+        uploaded_file = form.get("file")
+        if not uploaded_file or not hasattr(uploaded_file, "read"):
+            raise HTTPException(status_code=422, detail="No 'file' field found in multipart upload.")
+        file_name = getattr(uploaded_file, "filename", "uploaded_file") or "uploaded_file"
+        file_bytes = await uploaded_file.read()
+    else:
+        try:
+            body = await request.json()
+        except Exception:
+            raise HTTPException(status_code=422, detail="Invalid request body.")
+        file_name = body.get("fileName", "uploaded_file")
+        b64_content = body.get("fileContentBase64", "")
+        if not b64_content:
+            raise HTTPException(status_code=422, detail="Missing fileContentBase64 in JSON payload.")
+        try:
+            file_bytes = base64.b64decode(b64_content)
+        except Exception as exc:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Invalid base64 content: {str(exc)}",
+            )
 
     if len(file_bytes) > MAX_FILE_SIZE:
         raise HTTPException(
@@ -93,7 +109,7 @@ async def analyze_file(request: FileAnalysisRequest) -> FileAnalysisResult:
 
     # Fallback to heuristics if VT unknown/unavailable.
     if vt_verdict["verdict"] == "unknown":
-        heuristic = _heuristic_verdict(request.fileName, len(file_bytes))
+        heuristic = _heuristic_verdict(file_name, len(file_bytes))
         verdict = heuristic.verdict
         risk_score = heuristic.riskScore
         reasons = heuristic.reasons + ["virustotal_not_found"]
@@ -107,7 +123,7 @@ async def analyze_file(request: FileAnalysisRequest) -> FileAnalysisResult:
     engine_mode = "virustotal" if is_available() else "heuristic-only"
 
     return FileAnalysisResult(
-        fileName=request.fileName,
+        fileName=file_name,
         fileSizeBytes=len(file_bytes),
         sha256=file_hash,
         verdict=FileVerdict(

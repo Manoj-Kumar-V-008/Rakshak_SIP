@@ -33,6 +33,10 @@ module.exports = {
     'react-native/no-color-literals': 'warn', // Forces design system usage
     'react-native/no-raw-text': 'off',
   },
+  env: {
+    node: true,
+    es2021: true,
+  },
   ignorePatterns: [
     'node_modules/',
     '.expo/',
@@ -41,5 +45,7 @@ module.exports = {
     'babel.config.js',
     'metro.config.js',
     'jest.config.js',
+    '.eslintrc.js',
+    'scripts/',
   ],
 };

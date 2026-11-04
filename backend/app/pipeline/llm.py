@@ -101,7 +101,7 @@ def score(text: str) -> tuple[float | None, str | None, str]:
         return None, None, "skipped (no LLM key)"
     prov = provider()
     api_key = os.getenv("RAKSHAK_LLM_API_KEY", "")
-    default_model = "gemini-1.5-flash" if prov == "gemini" else "meta/llama-3.1-8b-instruct"
+    default_model = "gemini-3.5-flash-lite" if prov == "gemini" else "meta/llama-3.1-8b-instruct"
     model = os.getenv("RAKSHAK_LLM_MODEL", default_model)
     try:
         timeout_s = float(os.getenv("RAKSHAK_LLM_TIMEOUT", "12"))

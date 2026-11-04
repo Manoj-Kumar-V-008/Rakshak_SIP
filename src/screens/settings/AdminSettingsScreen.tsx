@@ -41,7 +41,8 @@ export const AdminSettingsScreen: React.FC = () => {
     try {
       const health = await checkHealth(url);
       setBackendUrl(url);
-      setStatus(`Connected · ${health.engine} · rules v${health.rulesVersion}`);
+      const llmInfo = health.llm === 'ready' ? 'LLM: ready' : 'LLM: off (needs RAKSHAK_LLM_API_KEY)';
+      setStatus(`Connected · ${health.engine} · rules v${health.rulesVersion} · ${llmInfo}`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Unable to test the connection.');
     } finally { setTesting(false); }
@@ -51,11 +52,40 @@ export const AdminSettingsScreen: React.FC = () => {
     <Header title="Demo Connection" showBack />
     <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <Text style={[styles.heading, theme.fonts.h3, { color: theme.colors.textPrimary }]}>Backend URL</Text>
-      <Text style={[styles.helper, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>For a physical phone, use your laptop’s Wi-Fi or hotspot IPv4 address and port 8000.</Text>
-      <TextInput value={url} onChangeText={setUrl} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="http://192.168.1.23:8000" placeholderTextColor={theme.colors.textMuted} style={[styles.input, theme.fonts.bodyMedium, { color: theme.colors.textPrimary, borderColor: theme.colors.outline, backgroundColor: theme.colors.surface }]} />
+      <Text style={[styles.helper, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>
+        Connect to your cloud backend (e.g. Render) or your laptop over local Wi-Fi.
+      </Text>
+      <TextInput
+        value={url}
+        onChangeText={setUrl}
+        autoCapitalize="none"
+        autoCorrect={false}
+        keyboardType="url"
+        placeholder="https://rakshak-ai-api.onrender.com"
+        placeholderTextColor={theme.colors.textMuted}
+        style={[styles.input, theme.fonts.bodyMedium, { color: theme.colors.textPrimary, borderColor: theme.colors.outline, backgroundColor: theme.colors.surface }]}
+      />
+      <View style={styles.presetsRow}>
+        <TouchableOpacity
+          onPress={() => setUrl('http://10.214.32.234:8000')}
+          style={[styles.presetBtn, { borderColor: theme.colors.outline }]}
+        >
+          <Text style={[theme.fonts.labelSmall, { color: theme.colors.primary }]}>Local Wi-Fi PC</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setUrl('http://10.0.2.2:8000')}
+          style={[styles.presetBtn, { borderColor: theme.colors.outline }]}
+        >
+          <Text style={[theme.fonts.labelSmall, { color: theme.colors.textSecondary }]}>Android Emulator</Text>
+        </TouchableOpacity>
+      </View>
       <CustomButton title="Save backend URL" onPress={save} variant="outline" style={styles.button} />
       <CustomButton title="Test connection" onPress={testConnection} loading={testing} variant="primary" style={styles.button} />
-      {status && <View style={[styles.statusCard, { backgroundColor: theme.colors.surfaceContainer, borderColor: status.startsWith('Connected') || status.startsWith('Saved') ? theme.colors.safe : theme.colors.warning }]}><Text style={[theme.fonts.bodySmall, { color: theme.colors.textPrimary }]}>{status}</Text></View>}
+      {status ? (
+        <View style={[styles.statusCard, { backgroundColor: theme.colors.surfaceContainer, borderColor: status.startsWith('Connected') || status.startsWith('Saved') ? theme.colors.safe : theme.colors.warning }]}>
+          <Text style={[theme.fonts.bodySmall, { color: theme.colors.textPrimary }]}>{status}</Text>
+        </View>
+      ) : null}
 
       <Text style={[styles.heading, theme.fonts.h3, { color: theme.colors.textPrimary }]}>Engine mode</Text>
       <TouchableOpacity onPress={() => setEngineMode('auto')} style={[styles.modeCard, { borderColor: engineMode === 'auto' ? theme.colors.primary : theme.colors.outline, backgroundColor: theme.colors.surface }]}><Text style={[theme.fonts.bodyLarge, { color: theme.colors.textPrimary, fontWeight: '700' }]}>Auto (recommended)</Text><Text style={[theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>Use the FastAPI server, then fall back to on-device rules if it is unreachable.</Text></TouchableOpacity>
@@ -79,7 +109,11 @@ export const AdminSettingsScreen: React.FC = () => {
         variant="outline"
         style={styles.button}
       />
-      {rulesStatus && <View style={[styles.statusCard, { backgroundColor: theme.colors.surfaceContainer, borderColor: theme.colors.outline }]}><Text style={[theme.fonts.bodySmall, { color: theme.colors.textPrimary }]}>{rulesStatus}</Text></View>}
+      {rulesStatus ? (
+        <View style={[styles.statusCard, { backgroundColor: theme.colors.surfaceContainer, borderColor: theme.colors.outline }]}>
+          <Text style={[theme.fonts.bodySmall, { color: theme.colors.textPrimary }]}>{rulesStatus}</Text>
+        </View>
+      ) : null}
       <Text style={[styles.heading, theme.fonts.h3, { color: theme.colors.textPrimary }]}>Gemini explainer (opt-in)</Text>
       <Text style={[styles.helper, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>Off by default. Saved in SecureStore. The result screen sends text to Google only when you tap Explain.</Text>
       <TextInput value={geminiKey} onChangeText={setGeminiKeyInput} autoCapitalize="none" autoCorrect={false} secureTextEntry placeholder="Paste Gemini API key (blank to remove)" placeholderTextColor={theme.colors.textMuted} style={[styles.input, theme.fonts.bodyMedium, { color: theme.colors.textPrimary, borderColor: theme.colors.outline, backgroundColor: theme.colors.surface }]} />
@@ -96,11 +130,27 @@ export const AdminSettingsScreen: React.FC = () => {
         variant="outline"
         style={styles.button}
       />
-      {geminiStatus && <View style={[styles.statusCard, { backgroundColor: theme.colors.surfaceContainer, borderColor: theme.colors.outline }]}><Text style={[theme.fonts.bodySmall, { color: theme.colors.textPrimary }]}>{geminiStatus}</Text></View>}
+      {geminiStatus ? (
+        <View style={[styles.statusCard, { backgroundColor: theme.colors.surfaceContainer, borderColor: theme.colors.outline }]}>
+          <Text style={[theme.fonts.bodySmall, { color: theme.colors.textPrimary }]}>{geminiStatus}</Text>
+        </View>
+      ) : null}
       <CustomButton title="Done" onPress={() => navigation.goBack()} variant="success" style={styles.doneButton} />
     </ScrollView>
   </View>;
 };
 
-const styles = StyleSheet.create({ container: { flex: 1 }, content: { padding: 20, paddingBottom: 40 }, heading: { fontWeight: '700', marginBottom: 6, marginTop: 8 }, helper: { lineHeight: 18, marginBottom: 14 }, input: { borderWidth: 1.5, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, minHeight: 50 }, button: { width: '100%', marginTop: 8 }, statusCard: { borderWidth: 1, borderRadius: 12, padding: 12, marginTop: 12 }, modeCard: { borderWidth: 1.5, borderRadius: 14, padding: 14, marginTop: 10, gap: 5 }, doneButton: { width: '100%', marginTop: 18 } });
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  content: { padding: 20, paddingBottom: 40 },
+  heading: { fontWeight: '700', marginBottom: 6, marginTop: 8 },
+  helper: { lineHeight: 18, marginBottom: 14 },
+  input: { borderWidth: 1.5, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, minHeight: 50 },
+  presetsRow: { flexDirection: 'row', gap: 10, marginTop: 8, marginBottom: 4 },
+  presetBtn: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, alignItems: 'center' },
+  button: { width: '100%', marginTop: 8 },
+  statusCard: { borderWidth: 1, borderRadius: 12, padding: 12, marginTop: 12 },
+  modeCard: { borderWidth: 1.5, borderRadius: 14, padding: 14, marginTop: 10, gap: 5 },
+  doneButton: { width: '100%', marginTop: 18 },
+});
 export default AdminSettingsScreen;

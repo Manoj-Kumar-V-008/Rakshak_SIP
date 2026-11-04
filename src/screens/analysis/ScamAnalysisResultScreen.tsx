@@ -140,16 +140,16 @@ export const ScamAnalysisResultScreen: React.FC = () => {
 
       <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary }]}>What to do</Text>
       <View style={styles.listContainer}>{result.remediationSteps.map((step) => <View key={step} style={styles.listItem}><MaterialCommunityIcons name="shield-outline" size={16} color={theme.colors.safe} style={styles.listIcon} /><Text style={[styles.listItemText, theme.fonts.bodyMedium, { color: theme.colors.textSecondary }]}>{step}</Text></View>)}</View>
-      {result.level !== 'safe' && <CustomButton title="Call Cybercrime Helpline · 1930" onPress={callCybercrimeHelpline} variant="danger" style={styles.helplineButton} />}
+      {result.level !== 'safe' ? <CustomButton title="Call Cybercrime Helpline · 1930" onPress={callCybercrimeHelpline} variant="danger" style={styles.helplineButton} /> : null}
       <CustomButton title="Report as scam" onPress={() => submitFeedback('scam_confirmed')} variant="primary" loading={feedbackBusy} disabled={feedbackBusy} style={styles.helplineButton} />
       <CustomButton title="Mark as safe" onPress={() => submitFeedback('false_positive')} variant="outline" loading={feedbackBusy} disabled={feedbackBusy} style={styles.helplineButton} />
       <CustomButton title="Share warning" onPress={shareWarning} variant="secondary" style={styles.helplineButton} />
       <CustomButton title={speaking ? 'Stop spoken warning' : 'Hear warning aloud'} onPress={hearWarning} variant="outline" style={styles.helplineButton} />
-      {feedbackSent && <Text style={[theme.fonts.bodySmall, { color: theme.colors.safe, marginTop: 8, textAlign: 'center' }]}>{feedbackSent}</Text>}
+      {feedbackSent ? <Text style={[theme.fonts.bodySmall, { color: theme.colors.safe, marginTop: 8, textAlign: 'center' }]}>{feedbackSent}</Text> : null}
       <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary }]}>Simple explanation (opt-in)</Text>
       <Text style={[theme.fonts.bodySmall, { color: theme.colors.textSecondary, marginBottom: 8 }]}>Off by default. Sends this text to Google Gemini only when you tap Explain.</Text>
       <CustomButton title="Explain in simple words" onPress={handleExplain} variant="outline" loading={explaining} disabled={explaining} style={styles.helplineButton} />
-      {explanation && <View style={[styles.messageBox, { backgroundColor: theme.colors.surface }]}><Text style={[styles.messageText, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>{explanation}</Text></View>}
+      {explanation ? <View style={[styles.messageBox, { backgroundColor: theme.colors.surface }]}><Text style={[styles.messageText, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>{explanation}</Text></View> : null}
     </ScrollView>
   </View>;
 };

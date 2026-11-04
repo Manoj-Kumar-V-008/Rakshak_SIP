@@ -41,25 +41,12 @@ export const FileScannerScreen: React.FC = () => {
     }
   };
 
-  const readFileAsBase64 = async (uri: string): Promise<string> => {
-    const base64 = await FileSystem.readAsStringAsync(uri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-    return base64;
-  };
-
   const handleScanFile = async () => {
     if (!selectedFile) return;
     setLoading(true);
     setFileResult(null);
     try {
-      let base64 = '';
-      try {
-        base64 = await readFileAsBase64(selectedFile.uri);
-      } catch {
-        // If file is too large for base64 in memory, analyze with filename and size
-      }
-      const { result, via } = await analyzeFile(selectedFile.name, base64, selectedFile.size);
+      const { result, via } = await analyzeFile(selectedFile.uri, selectedFile.name, selectedFile.size);
       setFileResult(result);
       addFileRecord({
         fileName: result.fileName,
@@ -102,19 +89,19 @@ export const FileScannerScreen: React.FC = () => {
           <TouchableOpacity onPress={pickFile} style={[styles.pickButton, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]} disabled={loading}>
             <MaterialCommunityIcons name={selectedFile ? 'file-check' : 'file-upload'} size={32} color={theme.colors.primary} style={styles.icon} />
             <Text style={[styles.pickLabel, theme.fonts.bodyLarge, { color: theme.colors.textPrimary }]}>{selectedFile ? 'Change file' : 'Select file to scan'}</Text>
-            {selectedFile && (
+            {selectedFile ? (
               <Text style={[styles.pickSubtitle, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>{selectedFile.name}</Text>
-            )}
+            ) : null}
           </TouchableOpacity>
 
-          {selectedFile && (
+          {selectedFile ? (
             <View style={[styles.fileInfo, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
               <Text style={[styles.fileLabel, theme.fonts.caption, { color: theme.colors.textSecondary }]}>File</Text>
               <Text style={[styles.fileValue, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]} numberOfLines={1}>{selectedFile.name}</Text>
               <Text style={[styles.fileLabel, theme.fonts.caption, { color: theme.colors.textSecondary }]}>Size</Text>
               <Text style={[styles.fileValue, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>{(selectedFile.size / 1024).toFixed(1)} KB</Text>
             </View>
-          )}
+          ) : null}
 
           <CustomButton
             title={loading ? 'Scanning…' : 'Scan File'}
@@ -124,7 +111,7 @@ export const FileScannerScreen: React.FC = () => {
             style={styles.ctaButton}
           />
 
-          {fileResult && (
+          {fileResult ? (
             <View style={[styles.resultCard, { borderLeftWidth: 4, borderLeftColor: verdictColor(fileResult.verdict.verdict) }]}>
               <View style={styles.resultHeader}>
                 <Text style={[styles.verdictLabel, theme.fonts.h3, { color: verdictColor(fileResult.verdict.verdict), fontWeight: '800' }]}>{verdictLabel(fileResult.verdict.verdict)}</Text>
@@ -151,7 +138,7 @@ export const FileScannerScreen: React.FC = () => {
                 <Text style={[styles.engineLabel, theme.fonts.caption, { color: theme.colors.textMuted }]}>{fileResult.engine.mode === 'virustotal' ? 'Server · VirusTotal' : 'Server · heuristic-only'} · {fileResult.trace.map((t) => t.detail).join(' | ')}</Text>
               </View>
             </View>
-          )}
+          ) : null}
 
           <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary, marginTop: 24 }]}>About File Scanning</Text>
           <Text style={[styles.instruction, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>We compute a SHA-256 hash of the file locally and check it against VirusTotal&apos;s threat database. The full file content is never uploaded — only the hash is sent.</Text>

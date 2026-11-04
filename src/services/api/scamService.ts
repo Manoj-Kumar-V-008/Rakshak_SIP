@@ -91,7 +91,15 @@ export const analyzeAudio = async (uri: string, fileName = 'clip.m4a'): Promise<
   return Promise.race([upload, timeout]);
 };
 
-export type HealthStatus = { status: string; engine: string; rulesVersion: string };
+export type HealthStatus = {
+  status: string;
+  engine: string;
+  rulesVersion: string;
+  llm?: string;
+  semantic?: string;
+  safeBrowsing?: string;
+  virustotal?: string;
+};
 
 export const fetchRules = async (): Promise<unknown> => {
   const baseUrl = baseUrlFor(useConfigStore.getState().backendUrl);
@@ -111,10 +119,11 @@ export const fetchRules = async (): Promise<unknown> => {
 
 export const checkHealth = async (url: string): Promise<HealthStatus> => {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15_000);
+  // 35s timeout to allow Render free tier container spin-up (cold starts can take 20-30s)
+  const timeout = setTimeout(() => controller.abort(), 35_000);
   try {
     const response = await fetch(`${baseUrlFor(url)}/health`, { signal: controller.signal });
-    if (!response.ok) throw new ScamServiceError(`Server returned ${response.status}.`);
+    if (!response.ok) throw new ScamServiceError(`Server returned HTTP ${response.status}.`);
     const payload: unknown = await response.json();
     if (!payload || typeof payload !== 'object' || !('status' in payload) || !('engine' in payload) || !('rulesVersion' in payload)) throw new ScamServiceError('Server returned an invalid health response.');
     const health = payload as HealthStatus;
@@ -122,8 +131,14 @@ export const checkHealth = async (url: string): Promise<HealthStatus> => {
     return health;
   } catch (error) {
     if (error instanceof ScamServiceError) throw error;
-    if (error instanceof Error && error.name === 'AbortError') throw new ScamServiceError('Connection timed out. (If using free cloud hosting like Render, it may be waking up from sleep; please try again in 30 seconds).');
-    throw new ScamServiceError('Unable to reach the server. Check the URL, Wi-Fi/hotspot, and firewall.');
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new ScamServiceError('Connection timed out. If using Render free tier, the backend is waking up from sleep; please try again in 15 seconds.');
+    }
+    const cleanUrl = baseUrlFor(url);
+    if (cleanUrl.includes('10.0.2.2')) {
+      throw new ScamServiceError('10.0.2.2 is for Android Emulator only. On a physical phone, open Profile -> Demo Connection and enter your Render cloud URL or your laptop\'s Wi-Fi IP.');
+    }
+    throw new ScamServiceError(`Unable to reach backend at "${cleanUrl}". Please check internet connection, Wi-Fi, or update your URL in Demo Connection.`);
   } finally { clearTimeout(timeout); }
 };
 

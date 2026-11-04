@@ -156,9 +156,9 @@ export const DashboardScreen: React.FC = () => {
                   </View>
                   <View style={[styles.historyTextContainer, { backgroundColor: theme.colors.surfaceContainer, borderRadius: 8, padding: 8, marginTop: 6 }]}>
                     <Text numberOfLines={1} style={[styles.historyText, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>{item.originalUrl}</Text>
-                    {item.expandedUrl && (
-                      <Text numberOfLines={1} style={[styles.historyText, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>→ {item.expandedUrl}</Text>
-                    )}
+                    {item.expandedUrl ? (
+                      <Text numberOfLines={1} style={[styles.historyText, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>{`→ ${item.expandedUrl}`}</Text>
+                    ) : null}
                   </View>
                 </TouchableOpacity>
               );
