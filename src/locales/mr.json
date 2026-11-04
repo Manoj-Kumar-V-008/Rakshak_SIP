@@ -1,0 +1,139 @@
+{
+  "appName": "रक्षक AI",
+  "tagline": "डिजिटल फसवणुकीविरुद्ध तुमचा बुद्धिमान संरक्षक",
+
+  "common": {
+    "safe": "सुरक्षित",
+    "suspicious": "संशयास्पद",
+    "danger": "धोकादायक",
+    "riskScore": "धोका गुण",
+    "scamType": "घोटाळ्याचा प्रकार",
+    "redFlags": "धोक्याचे संकेत",
+    "whatToDo": "काय करावे",
+    "reportScam": "घोटाळा म्हणून नोंदवा",
+    "markSafe": "सुरक्षित म्हणून चिन्हांकित करा",
+    "shareWarning": "चेतावणी शेअर करा",
+    "hearWarning": "चेतावणी ऐका",
+    "callHelpline": "सायबर गुन्हे हेल्पलाइन · 1930",
+    "offlineMode": "ऑफलाइन मोड",
+    "serverMode": "सर्व्हर मोड",
+    "analyzing": "विश्लेषण करत आहे…",
+    "verifying": "पडताळणी करत आहे…",
+    "scanning": "स्कॅन करत आहे…",
+    "reporting": "नोंदवत आहे…",
+    "cancel": "रद्द करा",
+    "ok": "ठीक आहे",
+    "loggingIn": "साइन इन होत आहे…"
+  },
+
+  "scanner": {
+    "title": "स्कॅम स्कॅनर",
+    "instruction": "घोटाळ्याच्या पद्धती तपासण्यासाठी संदेश येथे पेस्ट करा.",
+    "placeholder": "संशयास्पद SMS, ईमेल किंवा UPI संदेश येथे पेस्ट करा...",
+    "analyzeMessage": "संदेश विश्लेषण करा",
+    "verifyLink": "लिंक तपासा",
+    "verifyLinkInstruction": "लिंक सुरक्षित आहे की घोटाळा हे तपासण्यासाठी पेस्ट करा.",
+    "linkPlaceholder": "लिंक येथे पेस्ट करा (उदा. http://bit.ly/3xYz)",
+    "verifyLinkButton": "लिंक तपासा",
+    "scamLink": "स्कॅम लिंक",
+    "suspiciousLink": "संशयास्पद",
+    "safeLink": "सुरक्षित लिंक",
+    "original": "मूळ",
+    "destination": "गंतव्य",
+    "sampleMessages": "नमुना संदेश",
+    "scanVoice": "व्हॉइस क्लिप स्कॅन करा",
+    "scanSms": "SMS स्कॅन करा",
+    "scanFile": "फाइल स्कॅन करा"
+  },
+
+  "sms": {
+    "title": "SMS स्कॅनर",
+    "instruction": "घोटाळ्यांसाठी SMS प्रेषक आणि संदेश मजकूर पेस्ट करा.",
+    "senderPlaceholder": "प्रेषक आयडी (उदा. SBI-BNK, HDFCBK)",
+    "messagePlaceholder": "येथे SMS संदेश मजकूर पेस्ट करा...",
+    "scanSms": "SMS स्कॅन करा",
+    "from": "कडून",
+    "message": "संदेश",
+    "sampleSms": "नमुना SMS"
+  },
+
+  "dashboard": {
+    "title": "रक्षक AI",
+    "welcome": "नमस्ते, {name}!",
+    "greeting": "{language} मोडमध्ये संरक्षण ढाल सक्रिय आहे.",
+    "systemLive": "सिस्टम लाइव्ह आहे",
+    "scannerStatus": "AI थ्रेट स्कॅनर स्थिती",
+    "secure": "सुरक्षित",
+    "warn": "चेतावणी",
+    "aiShieldActive": "AI ढाल सक्रिय आहे",
+    "threatAlerted": "धोका चेतावणी",
+    "noScans": "अद्याप कोणतेही स्कॅन नाहीत. संदेश पेस्ट करा किंवा कॉल क्लिप तपासा.",
+    "scanMix": "तुमचा स्कॅन इतिहास",
+    "safeScans": "सुरक्षित स्कॅन",
+    "suspiciousScans": "संशयास्पद स्कॅन",
+    "dangerScans": "धोकादायक स्कॅन",
+    "protectionStatus": "संरक्षण स्थिती",
+    "engine": "इंजिन",
+    "offlineRules": "ऑफलाइन नियम",
+    "scans": "स्कॅन",
+    "server": "सर्व्हर",
+    "liveWarnings": "थेट घोटाळा चेतावणी",
+    "smsProtection": "SMS संरक्षण",
+    "smsHistory": "SMS स्कॅन इतिहास",
+    "linkHistory": "लिंक पडताळणी इतिहास",
+    "noLinks": "कोणत्याही लिंक्स तपासल्या नाहीत.",
+    "noSms": "कोणतेही SMS स्कॅन केले नाहीत."
+  },
+
+  "sos": {
+    "title": "आपत्कालीन चेतावणी",
+    "message": "मी डिजिटल घोटाळ्याचा बळी असू शकतो. कृपया मदत करा.",
+    "helpline": "सायबर गुन्हे हेल्पलाइन: 1930"
+  },
+
+  "profile": {
+    "title": "प्रोफाइल आणि सेटिंग्ज",
+    "language": "भाषा",
+    "english": "इंग्रजी",
+    "hindi": "हिंदी",
+    "theme": "थीम",
+    "darkMode": "डार्क मोड",
+    "smsTracking": "SMS ट्रॅकिंग",
+    "emergencyContact": "आपत्कालीन संपर्क"
+  },
+
+  "learn": {
+    "title": "स्कॅम माहिती केंद्र",
+    "digitalArrest": "डिजिटल अटक घोटाळा",
+    "credentialPhishing": "बँक तपशील / KYC फिशिंग",
+    "utilityDisconnection": "वीज तोडण्याची फसवणूक",
+    "lotteryPrize": "लॉटरी / बक्षीस घोटाळा",
+    "fakeJob": "बनावट नोकरी घोटाळा",
+    "investmentFraud": "गुंतवणूक घोटाळा",
+    "loanHarassment": "इन्स्टंट कर्ज छळ",
+    "maliciousApp": "घातक अॅप घोटाळा",
+    "suspiciousLink": "संशयास्पद लहान लिंक"
+  },
+
+  "results": {
+    "title": "विश्लेषण निकाल",
+    "rulesRiskScore": "नियम धोका गुण",
+    "subScores": "उप गुण",
+    "urgency": "तातडी",
+    "impersonation": "तोतयागिरी",
+    "coercion": "दबाव",
+    "financialAsk": "पैशांची मागणी",
+    "scannedMessage": "स्कॅन केलेला संदेश",
+    "evidenceFound": "आढळलेले पुरावे",
+    "remediationSteps": "काय करावे",
+    "simpleExplanation": "सोपे स्पष्टीकरण",
+    "explainInSimpleWords": "सोप्या शब्दांत स्पष्ट करा",
+    "sendToGemini": "Gemini कडे पाठवायचे?",
+    "explainConsent": "हे सोप्या स्पष्टीकरणासाठी संदेश Google Gemini ला पाठवते.",
+    "explain": "स्पष्ट करा",
+    "geminiKeyNeeded": "Gemini की आवश्यक आहे",
+    "geminiKeyDetail": "Demo Connection मध्ये Gemini API की सेव्ह करा.",
+    "openSettings": "सेटिंग्ज उघडा",
+    "offByDefault": "तुम्ही 'स्पष्ट करा' टॅप केल्यावरच हा मजकूर पाठवला जातो."
+  }
+}

@@ -7,9 +7,11 @@ from app.pipeline.rules import RULES, analyze_text
 from app.routers.audio import router as audio_router
 from app.routers.feedback import router as feedback_router
 from app.routers.link import router as link_router
+from app.routers.file import router as file_router
 from app.routers.report import router as report_router
 from app.routers.auth import router as auth_router
 from app.pipeline.safe_browsing import is_available as sb_is_available
+from app.pipeline.virustotal import is_available as vt_is_available
 from app.schemas import AnalyzeTextRequest, AnalysisResult
 from app.storage.db import init_db, init_reported_links, init_users
 
@@ -25,13 +27,14 @@ async def lifespan(_: FastAPI):
 app = FastAPI(title="Rakshak AI API", version="0.1.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Local evaluation prototype; restrict this before deployment.
-    allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type"],
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 app.include_router(feedback_router)
 app.include_router(audio_router)
 app.include_router(link_router)
+app.include_router(file_router)
 app.include_router(report_router)
 app.include_router(auth_router)
 
@@ -53,6 +56,7 @@ def health() -> dict[str, object]:
         "llm": "ready" if llm_mod.is_available() else "off",
         "semantic": "ready" if semantic_mod.is_available() else "off",
         "safeBrowsing": "ready" if sb_is_available() else "off",
+        "virustotal": "ready" if vt_is_available() else "off",
     }
 
 

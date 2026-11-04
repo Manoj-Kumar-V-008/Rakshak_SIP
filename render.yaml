@@ -16,8 +16,8 @@ services:
       - key: RAKSHAK_LLM_PROVIDER
         value: gemini
       - key: RAKSHAK_LLM_MODEL
-        value: gemini-3.5-flash-lite
+        value: gemini-1.5-flash
       - key: RAKSHAK_TRANSCRIBE_MODEL
-        value: gemini-3.5-flash-lite
+        value: gemini-1.5-flash
       - key: RAKSHAK_LLM_API_KEY
         sync: false

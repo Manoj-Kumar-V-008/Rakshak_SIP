@@ -1,0 +1,139 @@
+{
+  "appName": "রক্ষক AI",
+  "tagline": "ডিজিটাল প্রতারণার বিরুদ্ধে আপনার বিশ্বস্ত অভিভাবক",
+
+  "common": {
+    "safe": "নিরাপদ",
+    "suspicious": "সন্দেহজনক",
+    "danger": "বিপদ",
+    "riskScore": "ঝুঁকি স্কোর",
+    "scamType": "প্রতারণার ধরন",
+    "redFlags": "সতর্কবার্তা লক্ষণ",
+    "whatToDo": "কী করবেন",
+    "reportScam": "প্রতারণা হিসাবে রিপোর্ট করুন",
+    "markSafe": "নিরাপদ চিহ্নিত করুন",
+    "shareWarning": "সতর্কতা শেয়ার করুন",
+    "hearWarning": "সতর্কতা শুনুন",
+    "callHelpline": "সাইবার ক্রাইম হেল্পলাইন · 1930",
+    "offlineMode": "অফলাইন মোড",
+    "serverMode": "সার্ভার মোড",
+    "analyzing": "বিশ্লেষণ করা হচ্ছে…",
+    "verifying": "যাচাই করা হচ্ছে…",
+    "scanning": "স্ক্যান করা হচ্ছে…",
+    "reporting": "রিপোর্ট করা হচ্ছে…",
+    "cancel": "বাতিল",
+    "ok": "ঠিক আছে",
+    "loggingIn": "সাইন ইন হচ্ছে…"
+  },
+
+  "scanner": {
+    "title": "স্ক্যাম স্ক্যানার",
+    "instruction": "প্রতারণার ধরন যাচাই করতে বার্তাটি এখানে পেস্ট করুন।",
+    "placeholder": "সন্দেহভাজন SMS, ইমেল বা UPI লিঙ্ক এখানে পেস্ট করুন...",
+    "analyzeMessage": "বার্তা বিশ্লেষণ করুন",
+    "verifyLink": "লিঙ্ক যাচাই করুন",
+    "verifyLinkInstruction": "লিঙ্কটি নিরাপদ নাকি প্রতারণা তা পরীক্ষা করতে পেস্ট করুন।",
+    "linkPlaceholder": "লিঙ্ক এখানে পেস্ট করুন (যেমন http://bit.ly/3xYz)",
+    "verifyLinkButton": "লিঙ্ক যাচাই করুন",
+    "scamLink": "প্রতারণামূলক লিঙ্ক",
+    "suspiciousLink": "সন্দেহজনক",
+    "safeLink": "নিরাপদ লিঙ্ক",
+    "original": "আসল",
+    "destination": "গন্তব্য",
+    "sampleMessages": "নমুনা বার্তা",
+    "scanVoice": "ভয়েস ক্লিপ স্ক্যান করুন",
+    "scanSms": "SMS স্ক্যান করুন",
+    "scanFile": "ফাইল স্ক্যান করুন"
+  },
+
+  "sms": {
+    "title": "SMS স্ক্যানার",
+    "instruction": "SMS প্রেরক এবং বার্তা পেস্ট করে প্রতারণা পরীক্ষা করুন।",
+    "senderPlaceholder": "প্রেরক আইডি (যেমন SBI-BNK, HDFCBK)",
+    "messagePlaceholder": "SMS বার্তা এখানে পেস্ট করুন...",
+    "scanSms": "SMS স্ক্যান করুন",
+    "from": "থেকে",
+    "message": "বার্তা",
+    "sampleSms": "নমুনা SMS"
+  },
+
+  "dashboard": {
+    "title": "রক্ষক AI",
+    "welcome": "নমস্কার, {name}!",
+    "greeting": "{language} মোডে সক্রিয় সুরক্ষা শিল্ড।",
+    "systemLive": "সিস্টেম লাইভ",
+    "scannerStatus": "AI থ্রেট স্ক্যানার স্থিতি",
+    "secure": "সুরক্ষিত",
+    "warn": "সতর্কতা",
+    "aiShieldActive": "AI শিল্ড সক্রিয়",
+    "threatAlerted": "হুমকি সতর্কতা",
+    "noScans": "এখনও কোনও স্ক্যান নেই। বার্তা পেস্ট করুন বা কল ক্লিপ বিশ্লেষণ করুন।",
+    "scanMix": "আপনার স্ক্যান ইতিহাস",
+    "safeScans": "নিরাপদ স্ক্যান",
+    "suspiciousScans": "সন্দেহজনক স্ক্যান",
+    "dangerScans": "বিপজ্জনক স্ক্যান",
+    "protectionStatus": "সুরক্ষা স্থিতি",
+    "engine": "ইঞ্জিন",
+    "offlineRules": "অফলাইন নিয়ম",
+    "scans": "স্ক্যান",
+    "server": "সার্ভার",
+    "liveWarnings": "লাইভ প্রতারণা সতর্কতা",
+    "smsProtection": "SMS সুরক্ষা",
+    "smsHistory": "SMS স্ক্যান ইতিহাস",
+    "linkHistory": "লিঙ্ক যাচাই ইতিহাস",
+    "noLinks": "কোনও লিঙ্ক যাচাই করা হয়নি।",
+    "noSms": "কোনও SMS স্ক্যান করা হয়নি।"
+  },
+
+  "sos": {
+    "title": "জরুরী সতর্কতা",
+    "message": "আমি ডিজিটাল প্রতারণার শিকার হতে পারি। দয়া করে সাহায্য করুন।",
+    "helpline": "সাইবার ক্রাইম হেল্পলাইন: 1930"
+  },
+
+  "profile": {
+    "title": "প্রোফাইল এবং সেটিংস",
+    "language": "ভাষা",
+    "english": "ইংরেজি",
+    "hindi": "হিন্দি",
+    "theme": "থিম",
+    "darkMode": "ডার্ক মোড",
+    "smsTracking": "SMS ট্র্যাকিং",
+    "emergencyContact": "জরুরী যোগাযোগ"
+  },
+
+  "learn": {
+    "title": "প্রতারণা তথ্য কেন্দ্র",
+    "digitalArrest": "ডিজিটাল গ্রেফতার প্রতারণা",
+    "credentialPhishing": "ব্যাংক তথ্য / KYC ফিশিং",
+    "utilityDisconnection": "বিদ্যুৎ সংযোগ বিচ্ছিন্ন করার প্রতারণা",
+    "lotteryPrize": "লটারি / পুরস্কার প্রতারণা",
+    "fakeJob": "ভুয়া চাকরির প্রতারণা",
+    "investmentFraud": "বিনিয়োগ প্রতারণা",
+    "loanHarassment": "তাত্ক্ষণিক ঋণ হয়রানি",
+    "maliciousApp": "ক্ষতিকারক অ্যাপ প্রতারণা",
+    "suspiciousLink": "সন্দেহজনক ছোট লিঙ্ক"
+  },
+
+  "results": {
+    "title": "বিশ্লেষণ ফলাফল",
+    "rulesRiskScore": "নিয়ম ঝুঁকি স্কোর",
+    "subScores": "সাব-স্কোর",
+    "urgency": "জরুরী",
+    "impersonation": "ছদ্মবেশ",
+    "coercion": "জোরজবরদস্তি",
+    "financialAsk": "আর্থিক দাবি",
+    "scannedMessage": "স্ক্যান করা বার্তা",
+    "evidenceFound": "প্রমাণ পাওয়া গেছে",
+    "remediationSteps": "কী করবেন",
+    "simpleExplanation": "সহজ ব্যাখ্যা",
+    "explainInSimpleWords": "সহজ ভাষায় ব্যাখ্যা করুন",
+    "sendToGemini": "Gemini-তে পাঠাবেন?",
+    "explainConsent": "এটি সহজ ব্যাখ্যার জন্য বার্তাটি Google Gemini-তে পাঠায়।",
+    "explain": "ব্যাখ্যা করুন",
+    "geminiKeyNeeded": "Gemini কী প্রয়োজন",
+    "geminiKeyDetail": "Demo Connection-এ Gemini API কী সংরক্ষণ করুন।",
+    "openSettings": "সেটিংস খুলুন",
+    "offByDefault": "আপনি 'ব্যাখ্যা করুন' ট্যাপ করলেই এটি পাঠানো হয়।"
+  }
+}

@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -12,9 +23,9 @@ import { useConfigStore } from '../../store/useConfigStore';
 import { analyze, verifyLink, type LinkAnalysisResponse } from '../../services/engine/analyze';
 import { reportScamLink } from '../../services/api/scamService';
 import { useRemoteRules } from '../../hooks/useRemoteRules';
-import { t, setLanguage, getLanguage } from '../../locales';
-import { sendScamAlert, areNotificationsEnabled } from '../../services/notifications/notificationService';
+import { t, setLanguage } from '../../locales';
 import { Language } from '../../locales';
+import { Card } from '../../components/common/Card';
 
 type NavigationProp = StackNavigationProp<RootStackParamList, 'App'>;
 const templates = [
@@ -39,9 +50,22 @@ export const ScannerScreen: React.FC = () => {
   const [linkResult, setLinkResult] = useState<LinkAnalysisResponse | null>(null);
   const [reportLinkBusy, setReportLinkBusy] = useState(false);
 
-  const handleLanguageChange = (lang: Language) => {
-    setLang(lang);
-    setLanguage(lang);
+  const handleLanguageChange = () => {
+    Alert.alert(
+      t('profile.language'),
+      'Select preferred language:',
+      [
+        { text: 'English', onPress: () => { setLang('en'); setLanguage('en'); } },
+        { text: 'Hindi (हिन्दी)', onPress: () => { setLang('hi'); setLanguage('hi'); } },
+        { text: 'Tamil (தமிழ்)', onPress: () => { setLang('ta'); setLanguage('ta'); } },
+        { text: 'Telugu (తెలుగు)', onPress: () => { setLang('te'); setLanguage('te'); } },
+        { text: 'Kannada (ಕನ್ನಡ)', onPress: () => { setLang('kn'); setLanguage('kn'); } },
+        { text: 'Marathi (मराठी)', onPress: () => { setLang('mr'); setLanguage('mr'); } },
+        { text: 'Bengali (বাংলা)', onPress: () => { setLang('bn'); setLanguage('bn'); } },
+        { text: t('common.cancel'), style: 'cancel' },
+      ],
+      { cancelable: true }
+    );
   };
 
   const handleAnalyze = async () => {
@@ -84,14 +108,6 @@ export const ScannerScreen: React.FC = () => {
       if (via === 'offline') {
         Alert.alert(t('common.offlineMode'), 'The server was unavailable. Link checks used on-device heuristics.');
       }
-      // Send push notification for dangerous links.
-      if (result.overallVerdict === 'danger' && await areNotificationsEnabled()) {
-        await sendScamAlert({
-          title: 'Scam Link Detected',
-          body: `A dangerous link was found: ${result.urls[0]?.original ?? 'unknown link'}`,
-          data: { url: result.urls[0]?.original ?? '', score: String(result.overallRiskScore) },
-        });
-      }
     } catch (error) {
       const detail = error instanceof Error ? error.message : 'Unknown error.';
       Alert.alert('Link check unavailable', detail);
@@ -128,93 +144,194 @@ export const ScannerScreen: React.FC = () => {
     return t('common.safe').toUpperCase();
   };
 
-  const langLabel = (lang: Language) => (lang === 'hi' ? t('profile.hindi') : t('profile.english'));
+  const langLabel = (lang: Language) => {
+    switch (lang) {
+      case 'hi': return 'हिन्दी';
+      case 'ta': return 'தமிழ்';
+      case 'te': return 'తెలుగు';
+      case 'kn': return 'ಕನ್ನಡ';
+      case 'mr': return 'मराठी';
+      case 'bn': return 'বাংলা';
+      case 'en':
+      default: return 'English';
+    }
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <Header title={t('scanner.title')} />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.flex}>
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-          <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary }]}>Server · transparent rules engine</Text>
-          <Text style={[styles.instruction, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>Paste a message to scan it against explainable scam patterns. Your text is sent only to the configured Rakshak backend.</Text>
-          <View style={[styles.inputContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.surface }]}>
-            <TextInput multiline numberOfLines={6} value={message} onChangeText={setMessage} placeholder="Paste suspicious SMS, email, or UPI link message here..." placeholderTextColor={theme.colors.textMuted} style={[styles.input, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]} maxLength={1000} editable={!loading} />
-            {message.length > 0 && !loading && <TouchableOpacity onPress={() => setMessage('')} style={styles.clearBtn}><MaterialCommunityIcons name="close-circle" size={18} color={theme.colors.textMuted} /></TouchableOpacity>}
-          </View>
+          {/* Message Scanner Card */}
+          <Card padding={20} radius={20} elevation={3}>
+            <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary }]}>Message Scanner</Text>
+            <Text style={[styles.instruction, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>Paste a message to scan it against explainable scam patterns.</Text>
+            <View style={[styles.inputContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.surfaceContainer }]}>
+              <TextInput
+                multiline
+                numberOfLines={5}
+                value={message}
+                onChangeText={setMessage}
+                placeholder="Paste suspicious SMS, email, or UPI link message here..."
+                placeholderTextColor={theme.colors.textMuted}
+                style={[styles.input, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}
+                maxLength={1000}
+                editable={!loading}
+              />
+              {message.length > 0 && !loading && (
+                <TouchableOpacity onPress={() => setMessage('')} style={styles.clearBtn}>
+                  <MaterialCommunityIcons name="close-circle" size={20} color={theme.colors.textMuted} />
+                </TouchableOpacity>
+              )}
+            </View>
 
-          {/* Language toggle */}
-          <View style={styles.langRow}>
-            <Text style={[styles.langLabel, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>{t('profile.language')}:</Text>
-            <TouchableOpacity onPress={() => handleLanguageChange(currentLang === 'en' ? 'hi' : 'en')} style={styles.langBtn}>
-              <Text style={[styles.langValue, theme.fonts.bodyMedium, { color: theme.colors.primary }]}>{langLabel(currentLang === 'en' ? 'hi' : 'en')}</Text>
+            {/* Language toggle */}
+            <View style={styles.langRow}>
+              <Text style={[styles.langLabel, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>{t('profile.language')}:</Text>
+              <TouchableOpacity onPress={handleLanguageChange} style={styles.langBtn}>
+                <Text style={[styles.langValue, theme.fonts.bodyMedium, { color: theme.colors.primary }]}>{langLabel(currentLang)} ▾</Text>
+              </TouchableOpacity>
+            </View>
+
+            <CustomButton
+              title={loading ? t('common.analyzing') : t('scanner.analyzeMessage')}
+              onPress={handleAnalyze}
+              variant="primary"
+              disabled={loading || message.trim().length < 5}
+              style={styles.ctaButton}
+            />
+          </Card>
+
+          {/* Link Verification Card */}
+          <Card padding={20} radius={20} elevation={3} marginTop={16}>
+            <View style={styles.sectionRow}>
+              <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary }]}>{t('scanner.verifyLink')}</Text>
+              <Text style={[styles.sectionSubtitle, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>Check if a link is safe or a scam</Text>
+            </View>
+            <View style={[styles.inputContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.surfaceContainer, marginTop: 12 }]}>
+              <TextInput
+                multiline
+                numberOfLines={2}
+                value={linkInput}
+                onChangeText={setLinkInput}
+                placeholder="Paste a link here (e.g. http://bit.ly/3xYz)"
+                placeholderTextColor={theme.colors.textMuted}
+                style={[styles.input, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}
+                maxLength={500}
+                editable={!linkLoading}
+              />
+              {linkInput.length > 0 && !linkLoading && (
+                <TouchableOpacity onPress={() => setLinkInput('')} style={styles.clearBtn}>
+                  <MaterialCommunityIcons name="close-circle" size={20} color={theme.colors.textMuted} />
+                </TouchableOpacity>
+              )}
+            </View>
+            <CustomButton
+              title={linkLoading ? t('common.verifying') : t('scanner.verifyLinkButton')}
+              onPress={handleVerifyLink}
+              variant="primary"
+              disabled={linkLoading || linkInput.trim().length < 5}
+              style={styles.ctaButton}
+            />
+
+            {linkResult && (
+              <View style={[styles.linkResultCard, { borderLeftWidth: 4, borderLeftColor: verdictColor(linkResult.overallVerdict) }]}>
+                <View style={styles.linkResultHeader}>
+                  <Text style={[styles.verdictLabel, theme.fonts.h3, { color: verdictColor(linkResult.overallVerdict), fontWeight: '800' }]}>{verdictLabel(linkResult.overallVerdict)}</Text>
+                  <Text style={[styles.verdictScore, theme.fonts.bodyLarge, { color: theme.colors.textPrimary, fontWeight: '800' }]}>Risk {linkResult.overallRiskScore}/100</Text>
+                </View>
+                {linkResult.urls.map((url: LinkAnalysisResponse['urls'][number], idx: number) => (
+                  <View key={idx} style={styles.urlItem}>
+                    <Text style={[styles.urlLabel, theme.fonts.caption, { color: theme.colors.textSecondary }]}>Original</Text>
+                    <Text style={[styles.urlText, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>{url.original}</Text>
+                    {url.expanded && (
+                      <>
+                        <Text style={[styles.urlLabel, theme.fonts.caption, { color: theme.colors.textSecondary }]}>Destination</Text>
+                        <Text style={[styles.urlText, theme.fonts.bodyMedium, { color: theme.colors.primary }]}>{url.expanded}</Text>
+                      </>
+                    )}
+                    <View style={styles.urlBadges}>
+                      {url.domain && <Text style={[styles.badge, { backgroundColor: theme.colors.primaryContainer }]}>{url.domain}</Text>}
+                      <Text style={[styles.badge, { backgroundColor: url.isHttps ? theme.colors.safeContainer : theme.colors.dangerContainer, color: url.isHttps ? theme.colors.safe : theme.colors.danger }]}>{url.isHttps ? 'HTTPS' : 'HTTP'}</Text>
+                      {url.reputation && <Text style={[styles.badge, { backgroundColor: theme.colors.dangerContainer, color: theme.colors.danger }]}>REPUTATION: {url.reputation.threatType}</Text>}
+                      {url.reasons.length > 0 && <Text style={[styles.badge, { backgroundColor: theme.colors.dangerContainer, color: theme.colors.danger }]}>{url.reasons.join(', ')}</Text>}
+                    </View>
+                  </View>
+                ))}
+                <View style={styles.linkResultFooter}>
+                  <Text style={[styles.engineDetail, theme.fonts.caption, { color: theme.colors.textMuted }]}>{linkResult.engine.mode === 'offline-link' ? 'Offline · on-device heuristics' : linkResult.engine.mode === 'link-verifier+safebrowsing' ? 'Server · link verifier + Safe Browsing' : 'Server · link verifier'} · {linkResult.trace.map((t: { stage: string; ms: number; detail: string }) => t.detail).join(' | ')}</Text>
+                </View>
+                {linkResult.overallVerdict !== 'safe' && (
+                  <CustomButton
+                    title={reportLinkBusy ? t('common.reporting') : t('common.reportScam')}
+                    onPress={handleReportLink}
+                    variant="danger"
+                    loading={reportLinkBusy}
+                    disabled={reportLinkBusy}
+                    style={[styles.ctaButton, { marginTop: 12 }]}
+                  />
+                )}
+              </View>
+            )}
+          </Card>
+
+          {/* Engine Trace */}
+          {(loading || consoleLogs.length > 0) && (
+            <Card padding={16} radius={16} elevation={2} marginTop={16}>
+              <View style={styles.consoleHeader}>
+                <ActivityIndicator size="small" color={theme.colors.primary} style={styles.spinner} />
+                <Text style={[styles.consoleHeaderTitle, { color: theme.colors.textSecondary }]}>RAKSHAK_ENGINE_TRACE</Text>
+              </View>
+              {consoleLogs.map((log) => (
+                <Text key={log} style={[styles.logLine, { color: theme.colors.textSecondary }]}>{log}</Text>
+              ))}
+            </Card>
+          )}
+
+          {/* Quick Actions */}
+          <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary, marginTop: 16 }]}>Quick Actions</Text>
+          <View style={styles.actionsGrid}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('VoiceScanner')}
+              style={[styles.actionTile, { backgroundColor: theme.colors.surfaceContainer, borderColor: theme.colors.outline }]}
+              disabled={loading}
+            >
+              <MaterialCommunityIcons name="microphone" size={24} color={theme.colors.secondary} style={styles.actionIcon} />
+              <Text style={[styles.actionLabel, theme.fonts.bodySmall, { color: theme.colors.textPrimary }]}>Voice Scanner</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('SMSScreen')}
+              style={[styles.actionTile, { backgroundColor: theme.colors.surfaceContainer, borderColor: theme.colors.outline }]}
+              disabled={loading}
+            >
+              <MaterialCommunityIcons name="message" size={24} color={theme.colors.secondary} style={styles.actionIcon} />
+              <Text style={[styles.actionLabel, theme.fonts.bodySmall, { color: theme.colors.textPrimary }]}>{t('scanner.scanSms')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('FileScanner')}
+              style={[styles.actionTile, { backgroundColor: theme.colors.surfaceContainer, borderColor: theme.colors.outline }]}
+              disabled={loading}
+            >
+              <MaterialCommunityIcons name="file" size={24} color={theme.colors.secondary} style={styles.actionIcon} />
+              <Text style={[styles.actionLabel, theme.fonts.bodySmall, { color: theme.colors.textPrimary }]}>{t('scanner.scanFile')}</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Link verification section */}
-          <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary, marginTop: 24 }]}>{t('scanner.verifyLink')}</Text>
-          <Text style={[styles.instruction, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>{t('scanner.verifyLinkInstruction')}</Text>
-          <View style={[styles.inputContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.surface }]}>
-            <TextInput
-              multiline
-              numberOfLines={2}
-              value={linkInput}
-              onChangeText={setLinkInput}
-              placeholder="Paste a link here (e.g. http://bit.ly/3xYz or www.example.com)"
-              placeholderTextColor={theme.colors.textMuted}
-              style={[styles.input, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}
-              maxLength={500}
-              editable={!linkLoading}
-            />
-            {linkInput.length > 0 && !linkLoading && <TouchableOpacity onPress={() => setLinkInput('')} style={styles.clearBtn}><MaterialCommunityIcons name="close-circle" size={18} color={theme.colors.textMuted} /></TouchableOpacity>}
+          {/* Sample Messages */}
+          <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary, marginTop: 24 }]}>Sample Messages</Text>
+          <View style={styles.templatesGroup}>
+            {templates.map((template) => (
+              <TouchableOpacity
+                key={template.label}
+                onPress={() => setMessage(template.text)}
+                style={[styles.templateCard, { backgroundColor: theme.colors.surfaceContainer, borderColor: theme.colors.outline }]}
+                disabled={loading}
+              >
+                <Text style={[styles.templateLabel, theme.fonts.bodyLarge, { color: theme.colors.primary }]}>{template.label}</Text>
+                <Text numberOfLines={2} style={[styles.templatePreview, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>{template.text}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
-          <CustomButton title={linkLoading ? t('common.verifying') : t('scanner.verifyLinkButton')} onPress={handleVerifyLink} variant="primary" disabled={linkLoading || linkInput.trim().length < 5} style={styles.ctaButton} />
-
-          {linkResult && (
-            <View style={[styles.linkResultCard, { borderLeftWidth: 4, borderLeftColor: verdictColor(linkResult.overallVerdict) }]}>
-              <View style={styles.linkResultHeader}>
-                <Text style={[styles.verdictLabel, theme.fonts.h3, { color: verdictColor(linkResult.overallVerdict), fontWeight: '800' }]}>{verdictLabel(linkResult.overallVerdict)}</Text>
-                <Text style={[styles.verdictScore, theme.fonts.bodyLarge, { color: theme.colors.textPrimary, fontWeight: '800' }]}>Risk {linkResult.overallRiskScore}/100</Text>
-              </View>
-              {linkResult.urls.map((url: LinkAnalysisResponse['urls'][number], idx: number) => (
-                <View key={idx} style={styles.urlItem}>
-                  <Text style={[styles.urlLabel, theme.fonts.caption, { color: theme.colors.textSecondary }]}>Original</Text>
-                  <Text style={[styles.urlText, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>{url.original}</Text>
-                  {url.expanded && (
-                    <>
-                      <Text style={[styles.urlLabel, theme.fonts.caption, { color: theme.colors.textSecondary }]}>Destination</Text>
-                      <Text style={[styles.urlText, theme.fonts.bodyMedium, { color: theme.colors.primary }]}>{url.expanded}</Text>
-                    </>
-                  )}
-                  <View style={styles.urlBadges}>
-                    {url.domain && <Text style={[styles.badge, { backgroundColor: theme.colors.surfaceContainer }]}>{url.domain}</Text>}
-                    <Text style={[styles.badge, { backgroundColor: url.isHttps ? theme.colors.safeContainer : theme.colors.dangerContainer, color: url.isHttps ? theme.colors.safe : theme.colors.danger }]}>{url.isHttps ? 'HTTPS' : 'HTTP'}</Text>
-                    {url.reputation && <Text style={[styles.badge, { backgroundColor: theme.colors.dangerContainer, color: theme.colors.danger }]}>REPUTATION: {url.reputation.threatType}</Text>}
-                    {url.reasons.length > 0 && <Text style={[styles.badge, { backgroundColor: theme.colors.dangerContainer, color: theme.colors.danger }]}>{url.reasons.join(', ')}</Text>}
-                  </View>
-                </View>
-              ))}
-              <View style={styles.linkResultFooter}>
-                <Text style={[styles.engineDetail, theme.fonts.caption, { color: theme.colors.textMuted }]}>{linkResult.engine.mode === 'offline-link' ? 'Offline · on-device heuristics' : linkResult.engine.mode === 'link-verifier+safebrowsing' ? 'Server · link verifier + Safe Browsing' : 'Server · link verifier'} · {linkResult.trace.map((t: { stage: string; ms: number; detail: string }) => t.detail).join(' | ')}</Text>
-              </View>
-              {linkResult.overallVerdict !== 'safe' && (
-                <CustomButton
-                  title={reportLinkBusy ? t('common.reporting') : t('common.reportScam')}
-                  onPress={handleReportLink}
-                  variant="danger"
-                  loading={reportLinkBusy}
-                  disabled={reportLinkBusy}
-                  style={[styles.ctaButton, { marginTop: 12 }]}
-                />
-              )}
-            </View>
-          )}
-
-          {(loading || consoleLogs.length > 0) && <View style={styles.consoleViewer}><View style={styles.consoleHeader}>{loading && <ActivityIndicator size="small" color={theme.colors.primary} style={styles.spinner} />}<Text style={styles.consoleHeaderTitle}>RAKSHAK_ENGINE_TRACE</Text></View>{consoleLogs.map((log) => <Text key={log} style={[styles.logLine, { color: theme.colors.safe }]}>{log}</Text>)}</View>}
-          <CustomButton title={loading ? t('common.analyzing') : t('scanner.analyzeMessage')} onPress={handleAnalyze} variant="primary" disabled={loading || message.trim().length < 5} style={styles.ctaButton} />
-          <CustomButton title="Scan voice clip instead" onPress={() => navigation.navigate('VoiceScanner')} variant="outline" disabled={loading} style={styles.ctaButton} />
-          <CustomButton title={t('scanner.scanSms')} onPress={() => navigation.navigate('SMSScreen')} variant="outline" disabled={loading} style={styles.ctaButton} />
-          <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary, marginTop: 24 }]}>Sample messages</Text>
-          <View style={styles.templatesGroup}>{templates.map((template) => <TouchableOpacity key={template.label} onPress={() => setMessage(template.text)} style={[styles.templateCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]} disabled={loading}><Text style={[styles.templateLabel, theme.fonts.bodyLarge, { color: theme.colors.primary }]}>{template.label}</Text><Text numberOfLines={2} style={[styles.templatePreview, theme.fonts.bodySmall, { color: theme.colors.textSecondary }]}>{template.text}</Text></TouchableOpacity>)}</View>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -224,25 +341,25 @@ export const ScannerScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   flex: { flex: 1 },
-  scrollContent: { padding: 20, paddingBottom: 40 },
-  sectionTitle: { fontWeight: '700', marginBottom: 4 },
+  scrollContent: { padding: 16, paddingBottom: 40 },
+  sectionTitle: { fontWeight: '700', marginBottom: 6 },
+  sectionSubtitle: { fontSize: 12, color: '#64748B', marginBottom: 12 },
   instruction: { lineHeight: 18, marginBottom: 16 },
-  inputContainer: { borderWidth: 1.5, borderRadius: 16, padding: 12, minHeight: 140, marginBottom: 16 },
-  input: { flex: 1, textAlignVertical: 'top', fontSize: 15, lineHeight: 20 },
-  clearBtn: { position: 'absolute', bottom: 12, right: 12 },
-  consoleViewer: { backgroundColor: '#020617', borderColor: '#1E293B', borderWidth: 1, borderRadius: 12, padding: 12, marginBottom: 16 },
-  consoleHeader: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#1E293B', paddingBottom: 6, marginBottom: 8 },
+  inputContainer: { borderWidth: 1.5, borderRadius: 14, padding: 14, minHeight: 150, marginBottom: 16 },
+  input: { flex: 1, textAlignVertical: 'top', fontSize: 15, lineHeight: 22 },
+  clearBtn: { position: 'absolute', bottom: 14, right: 14 },
+  consoleHeader: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#334155', paddingBottom: 6, marginBottom: 8 },
   spinner: { marginRight: 8 },
   consoleHeaderTitle: { fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', color: '#94A3B8', fontWeight: '700', fontSize: 11, letterSpacing: 0.5 },
   logLine: { fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', fontSize: 12, lineHeight: 18, marginVertical: 2 },
   ctaButton: { width: '100%', marginTop: 8 },
   templatesGroup: { marginTop: 12 },
-  templateCard: { borderWidth: 1.5, borderRadius: 12, padding: 12, marginVertical: 6 },
+  templateCard: { borderWidth: 1.5, borderRadius: 12, padding: 14, marginVertical: 6 },
   templateLabel: { fontWeight: '700', marginBottom: 4 },
   templatePreview: { lineHeight: 16 },
 
   /* Link verification styles */
-  linkResultCard: { backgroundColor: '#151D30', borderColor: '#2A3654', borderWidth: 1, borderRadius: 16, padding: 16, marginTop: 16, marginBottom: 20 },
+  linkResultCard: { backgroundColor: '#1E293B', borderColor: '#334155', borderWidth: 1, borderRadius: 16, padding: 16, marginTop: 16, marginBottom: 20 },
   linkResultHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   verdictLabel: { textAlign: 'center' },
   verdictScore: { textAlign: 'center' },
@@ -251,13 +368,21 @@ const styles = StyleSheet.create({
   urlText: { fontSize: 14, lineHeight: 20, marginBottom: 8 },
   urlBadges: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 },
   badge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, fontSize: 10, fontWeight: '700' },
-  linkResultFooter: { marginTop: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#2A3654' },
+  linkResultFooter: { marginTop: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#334155' },
   engineDetail: { textAlign: 'center', fontSize: 11 },
 
   /* Language row */
   langRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
   langLabel: { fontWeight: '600' },
-  langBtn: { paddingVertical: 6, paddingHorizontal: 10, backgroundColor: '#151D30', borderRadius: 8 },
+  langBtn: { paddingVertical: 6, paddingHorizontal: 10, backgroundColor: '#1E3A8A', borderRadius: 8 },
   langValue: { fontWeight: '700' },
+
+  /* Section row */
+  sectionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+
+  /* Actions grid */
+  actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  actionTile: { width: '30%', borderWidth: 1, borderRadius: 12, padding: 14, alignItems: 'center' },
+  actionIcon: { marginBottom: 6 },
+  actionLabel: { fontSize: 11, textAlign: 'center' },
 });
-export default ScannerScreen;

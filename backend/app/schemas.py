@@ -126,6 +126,31 @@ class ReportedLinkEntry(BaseModel):
     createdAt: int
 
 
+# --- File analysis schemas ---
+
+class FileAnalysisRequest(BaseModel):
+    fileName: str = Field(min_length=1, max_length=255)
+    fileContentBase64: str = Field(min_length=1)  # base64-encoded file contents
+    maxSizeBytes: int = Field(default=25_000_000)  # 25MB default limit
+
+
+class FileVerdict(BaseModel):
+    verdict: Literal["safe", "suspicious", "danger", "unknown"]
+    riskScore: int = Field(ge=0, le=100)
+    reasons: list[str] = []
+    reputation: dict[str, object] | None = None
+
+
+class FileAnalysisResult(BaseModel):
+    analysisId: str = Field(default_factory=lambda: str(uuid4()))
+    fileName: str
+    fileSizeBytes: int
+    sha256: str
+    verdict: FileVerdict
+    engine: dict[str, object]
+    trace: list[dict[str, object]]
+
+
 # --- User authentication schemas ---
 
 class UserRegisterRequest(BaseModel):

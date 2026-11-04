@@ -33,7 +33,7 @@ const extractUrls = (text: string): string[] => {
 const offlineLinkCheck = (text: string): LinkAnalysisResponse => {
   const urls = extractUrls(text);
   const checks = urls.map((original: string) => {
-    let expanded: string | null = null;
+    const expanded: string | null = null;
     let domain: string | null = null;
     let scheme: string | null = null;
     let isHttps = false;

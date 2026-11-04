@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Language, setLanguage as setLocaleLanguage } from '../locales';
 
 export interface ScanRecord {
   id: string;
@@ -35,12 +36,23 @@ export interface SmsRecord {
   remediationSteps: string[];
 }
 
+export interface FileRecord {
+  id: string;
+  timestamp: string;
+  fileName: string;
+  fileSizeBytes: number;
+  sha256: string;
+  verdict: 'safe' | 'suspicious' | 'danger' | 'unknown';
+  riskScore: number;
+  reasons: string[];
+}
+
 export interface UserProfile {
   name: string;
   isRegistered: boolean;
   onboardingCompleted: boolean;
   smsTrackingAllowed: boolean;
-  preferredLanguage: 'en' | 'hi' | 'ta' | 'te' | 'kn';
+  preferredLanguage: Language;
   phoneNumber: string;
   userCategory: string;
   emergencyContactName: string;
@@ -54,18 +66,19 @@ interface ConfigState {
   scansHistory: ScanRecord[];
   linkHistory: LinkRecord[];
   smsHistory: SmsRecord[];
+  fileHistory: FileRecord[];
   backendUrl: string;
   engineMode: 'auto' | 'offline';
   pushToken: string | null;
   notificationEnabled: boolean;
   updateProfile: (profile: Partial<UserProfile>) => void;
   toggleTheme: () => void;
-  setLanguage: (lang: 'en' | 'hi') => void;
+  setLanguage: (lang: Language) => void;
   setPushToken: (token: string | null) => void;
   setNotificationEnabled: (enabled: boolean) => void;
   completeOnboarding: (
     name: string,
-    language: 'en' | 'hi' | 'ta' | 'te' | 'kn',
+    language: Language,
     phoneNumber?: string,
     userCategory?: string,
     emergencyContactName?: string,
@@ -74,6 +87,8 @@ interface ConfigState {
   addScanRecord: (record: Omit<ScanRecord, 'id' | 'timestamp'>) => void;
   addLinkRecord: (record: Omit<LinkRecord, 'id' | 'timestamp'>) => void;
   addSmsRecord: (record: Omit<SmsRecord, 'id' | 'timestamp'>) => void;
+  addFileRecord: (record: Omit<FileRecord, 'id' | 'timestamp'>) => void;
+  clearFileHistory: () => void;
   clearLinkHistory: () => void;
   clearSmsHistory: () => void;
   clearScanHistory: () => void;
@@ -103,6 +118,7 @@ export const useConfigStore = create<ConfigState>()(
       scansHistory: [],
       linkHistory: [],
       smsHistory: [],
+      fileHistory: [],
       backendUrl: process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:8000',
       engineMode: 'auto',
       pushToken: null,
@@ -115,10 +131,12 @@ export const useConfigStore = create<ConfigState>()(
         
       toggleTheme: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
   
-      setLanguage: (lang: 'en' | 'hi') =>
+      setLanguage: (lang: Language) => {
+        setLocaleLanguage(lang);
         set((state) => ({
           profile: { ...state.profile, preferredLanguage: lang },
-        })),
+        }));
+      },
       
       setPushToken: (token: string | null) =>
         set({ pushToken: token }),
@@ -126,7 +144,8 @@ export const useConfigStore = create<ConfigState>()(
       setNotificationEnabled: (enabled: boolean) =>
         set({ notificationEnabled: enabled }),
       
-      completeOnboarding: (name, language, phoneNumber, userCategory, emergencyContactName, emergencyContactPhone) =>
+      completeOnboarding: (name, language, phoneNumber, userCategory, emergencyContactName, emergencyContactPhone) => {
+        setLocaleLanguage(language);
         set((state) => ({
           profile: {
             ...state.profile,
@@ -139,7 +158,8 @@ export const useConfigStore = create<ConfigState>()(
             onboardingCompleted: true,
             isRegistered: true,
           },
-        })),
+        }));
+      },
         
       addScanRecord: (record) =>
         set((state) => {
@@ -177,6 +197,19 @@ export const useConfigStore = create<ConfigState>()(
           };
         }),
       
+      addFileRecord: (record: Omit<FileRecord, 'id' | 'timestamp'>) =>
+        set((state) => {
+          const newRecord: FileRecord = {
+            ...record,
+            id: Math.random().toString(36).substring(7),
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          };
+          return {
+            fileHistory: [newRecord, ...state.fileHistory],
+          };
+        }),
+      
+      clearFileHistory: () => set({ fileHistory: [] }),
       clearSmsHistory: () => set({ smsHistory: [] }),
       clearLinkHistory: () => set({ linkHistory: [] }),
       clearScanHistory: () => set({ scansHistory: [] }),
@@ -190,6 +223,7 @@ export const useConfigStore = create<ConfigState>()(
           scansHistory: [],
           linkHistory: [],
           smsHistory: [],
+          fileHistory: [],
           pushToken: null,
           notificationEnabled: true,
           backendUrl: process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:8000',
@@ -199,6 +233,11 @@ export const useConfigStore = create<ConfigState>()(
     {
       name: 'rakshak-config',
       storage: createJSONStorage(() => AsyncStorage),
+      onRehydrateStorage: () => (state) => {
+        if (state?.profile?.preferredLanguage) {
+          setLocaleLanguage(state.profile.preferredLanguage);
+        }
+      },
     }
   )
 );

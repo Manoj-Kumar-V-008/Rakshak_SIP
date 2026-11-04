@@ -79,9 +79,16 @@ export const RegisterScreen: React.FC = () => {
     navigation.goBack();
   };
 
+  const handleSkip = () => {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'App' }],
+    });
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Header title={t('profile.title')} showBack />
+      <Header title="Create Account" showBack />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.flex}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.brandGroup}>
@@ -159,6 +166,12 @@ export const RegisterScreen: React.FC = () => {
             disabled={loading}
             style={styles.ctaButton}
           />
+
+          <TouchableOpacity onPress={handleSkip} style={{ marginTop: 16, alignItems: 'center' }}>
+            <Text style={[theme.fonts.labelMedium, { color: theme.colors.textSecondary }]}>
+              Continue without signing in
+            </Text>
+          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>

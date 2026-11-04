@@ -111,7 +111,7 @@ export const fetchRules = async (): Promise<unknown> => {
 
 export const checkHealth = async (url: string): Promise<HealthStatus> => {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 5_000);
+  const timeout = setTimeout(() => controller.abort(), 15_000);
   try {
     const response = await fetch(`${baseUrlFor(url)}/health`, { signal: controller.signal });
     if (!response.ok) throw new ScamServiceError(`Server returned ${response.status}.`);
@@ -122,7 +122,7 @@ export const checkHealth = async (url: string): Promise<HealthStatus> => {
     return health;
   } catch (error) {
     if (error instanceof ScamServiceError) throw error;
-    if (error instanceof Error && error.name === 'AbortError') throw new ScamServiceError('Connection timed out after 5 seconds.');
+    if (error instanceof Error && error.name === 'AbortError') throw new ScamServiceError('Connection timed out. (If using free cloud hosting like Render, it may be waking up from sleep; please try again in 30 seconds).');
     throw new ScamServiceError('Unable to reach the server. Check the URL, Wi-Fi/hotspot, and firewall.');
   } finally { clearTimeout(timeout); }
 };

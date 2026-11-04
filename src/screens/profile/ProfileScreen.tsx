@@ -7,11 +7,12 @@ import { CustomButton } from '../../components/common/CustomButton';
 import { useConfigStore } from '../../store/useConfigStore';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useNavigation, CommonActions } from '@react-navigation/native';
+import { useAuth } from '../../context/AuthContext';
 import { t, setLanguage } from '../../locales';
 import { Language } from '../../locales';
-import { areNotificationsEnabled, requestNotificationPermissions } from '../../services/notifications/notificationService';
 
 export const ProfileScreen: React.FC = () => {
+  const { user, isAuthenticated, logout } = useAuth();
   const [showDb, setShowDb] = useState(false);
   const [selectedQueryIndex, setSelectedQueryIndex] = useState(0);
   const [selectedRowIndex, setSelectedRowIndex] = useState(0);
@@ -146,7 +147,7 @@ export const ProfileScreen: React.FC = () => {
   const theme = useTheme() as AppTheme;
   const navigation = useNavigation();
 
-  const { profile, toggleTheme, isDarkMode, resetConfig, updateProfile, scansHistory, setLanguage: setStoreLanguage, notificationEnabled, setNotificationEnabled } = useConfigStore((state) => ({
+  const { profile, toggleTheme, isDarkMode, resetConfig, updateProfile, scansHistory, setLanguage: setStoreLanguage } = useConfigStore((state) => ({
     profile: state.profile,
     toggleTheme: state.toggleTheme,
     isDarkMode: state.isDarkMode,
@@ -154,39 +155,24 @@ export const ProfileScreen: React.FC = () => {
     updateProfile: state.updateProfile,
     scansHistory: state.scansHistory,
     setLanguage: state.setLanguage,
-    notificationEnabled: state.notificationEnabled,
-    setNotificationEnabled: state.setNotificationEnabled,
   }));
 
   const handleLanguageChange = () => {
     Alert.alert(
       t('profile.language'),
-      'Select your language for active shield notifications:',
+      'Select your preferred language for scam protection & interface:',
       [
-        { text: t('profile.english'), onPress: () => { setStoreLanguage('en'); setLanguage('en'); updateProfile({ preferredLanguage: 'en' }); } },
-        { text: t('profile.hindi'), onPress: () => { setStoreLanguage('hi'); setLanguage('hi'); updateProfile({ preferredLanguage: 'hi' }); } },
-        { text: 'Tamil (தமிழ்)', onPress: () => updateProfile({ preferredLanguage: 'ta' }) },
-        { text: 'Telugu (तेಲುগు)', onPress: () => updateProfile({ preferredLanguage: 'te' }) },
-        { text: 'Kannada (ಕನ್ನಡ)', onPress: () => updateProfile({ preferredLanguage: 'kn' }) },
+        { text: 'English', onPress: () => { setStoreLanguage('en'); setLanguage('en'); } },
+        { text: 'Hindi (हिन्दी)', onPress: () => { setStoreLanguage('hi'); setLanguage('hi'); } },
+        { text: 'Tamil (தமிழ்)', onPress: () => { setStoreLanguage('ta'); setLanguage('ta'); } },
+        { text: 'Telugu (తెలుగు)', onPress: () => { setStoreLanguage('te'); setLanguage('te'); } },
+        { text: 'Kannada (ಕನ್ನಡ)', onPress: () => { setStoreLanguage('kn'); setLanguage('kn'); } },
+        { text: 'Marathi (मराठी)', onPress: () => { setStoreLanguage('mr'); setLanguage('mr'); } },
+        { text: 'Bengali (বাংলা)', onPress: () => { setStoreLanguage('bn'); setLanguage('bn'); } },
         { text: t('common.cancel'), style: 'cancel' },
       ],
       { cancelable: true }
     );
-  };
-
-  const handleToggleNotifications = async () => {
-    if (notificationEnabled) {
-      setNotificationEnabled(false);
-      Alert.alert('Notifications disabled', 'Enable notifications in Profile settings to receive scam alerts.');
-    } else {
-      const granted = await requestNotificationPermissions();
-      setNotificationEnabled(granted);
-      if (granted) {
-        Alert.alert('Notifications enabled', 'You will receive real-time alerts when a scam is detected.');
-      } else {
-        Alert.alert('Notifications disabled', 'Enable notifications in Profile settings to receive scam alerts.');
-      }
-    }
   };
 
   const handleReset = () => {
@@ -219,9 +205,13 @@ export const ProfileScreen: React.FC = () => {
       case 'ta':
         return 'Tamil (தமிழ்)';
       case 'te':
-        return 'Telugu (ತೆಲುಗು)';
+        return 'Telugu (తెలుగు)';
       case 'kn':
         return 'Kannada (ಕನ್ನಡ)';
+      case 'mr':
+        return 'Marathi (मराठी)';
+      case 'bn':
+        return 'Bengali (বাংলা)';
       case 'en':
       default:
         return 'English (US)';
@@ -331,26 +321,51 @@ export const ProfileScreen: React.FC = () => {
               </Text>
             </View>
           </View>
+        </View>
 
-          <View style={[styles.divider, { backgroundColor: theme.colors.outline }]} />
+        {/* Account & Cloud Sync */}
+        <Text style={[styles.sectionTitle, theme.fonts.h3, { color: theme.colors.textPrimary }]}>
+          Account & Cloud Sync
+        </Text>
 
-          {/* Push Notifications */}
-          <TouchableOpacity onPress={handleToggleNotifications} style={styles.settingsItem}>
-            <MaterialCommunityIcons name={notificationEnabled ? 'bell' : 'bell-off'} size={20} color={theme.colors.primary} style={styles.itemIcon} />
-            <View style={styles.itemTextContainer}>
-              <Text style={[styles.itemLabel, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>
-                Push Notifications
-              </Text>
-              <Text style={[styles.itemSubLabel, theme.fonts.caption, { color: theme.colors.textSecondary }]}>
-                {notificationEnabled ? 'Scam alerts enabled' : 'Alerts disabled'}
-              </Text>
+        <View style={[styles.settingsGroup, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
+          {isAuthenticated && user ? (
+            <View style={styles.settingsItem}>
+              <Ionicons name="person-circle-outline" size={24} color={theme.colors.primary} style={styles.itemIcon} />
+              <View style={styles.itemTextContainer}>
+                <Text style={[styles.itemLabel, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>
+                  {user.name || 'Cloud Connected'}
+                </Text>
+                <Text style={[styles.itemSubLabel, theme.fonts.caption, { color: theme.colors.textSecondary }]}>
+                  {user.email}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Sign Out', style: 'destructive', onPress: logout },
+                  ]);
+                }}
+                style={{ paddingHorizontal: 12, paddingVertical: 6 }}
+              >
+                <Text style={[theme.fonts.labelMedium, { color: theme.colors.error, fontWeight: '700' }]}>Sign Out</Text>
+              </TouchableOpacity>
             </View>
-            <MaterialCommunityIcons
-              name={notificationEnabled ? 'toggle-switch' : 'toggle-switch-off-outline'}
-              size={32}
-              color={notificationEnabled ? theme.colors.primary : theme.colors.textMuted}
-            />
-          </TouchableOpacity>
+          ) : (
+            <TouchableOpacity onPress={() => navigation.navigate('Login' as never)} style={styles.settingsItem}>
+              <Ionicons name="person-outline" size={20} color={theme.colors.primary} style={styles.itemIcon} />
+              <View style={styles.itemTextContainer}>
+                <Text style={[styles.itemLabel, theme.fonts.bodyMedium, { color: theme.colors.textPrimary }]}>
+                  Rakshak Cloud Account
+                </Text>
+                <Text style={[styles.itemSubLabel, theme.fonts.caption, { color: theme.colors.textSecondary }]}>
+                  Sign in or register to sync scam threat reports
+                </Text>
+              </View>
+              <MaterialCommunityIcons name="chevron-right" size={24} color={theme.colors.textMuted} />
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Local Database Tables Explorer */}

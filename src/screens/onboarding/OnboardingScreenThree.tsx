@@ -51,7 +51,8 @@ export const OnboardingScreenThree: React.FC = () => {
     completeOnboarding(trimmedName, selectedLanguage);
 
     // Reset Root navigation stack to 'App'
-    navigation.dispatch(
+    const parentNav = navigation.getParent() || navigation;
+    parentNav.dispatch(
       CommonActions.reset({
         index: 0,
         routes: [{ name: 'App' }],
