@@ -29,20 +29,22 @@ def _whisper_present() -> bool:
     return True
 
 
-def _gemini_ready() -> bool:
+def _gemini_ready(gemini_key: str | None = None) -> bool:
+    if gemini_key:
+        return True
     return os.getenv("RAKSHAK_LLM_PROVIDER", "off").lower() == "gemini" and bool(os.getenv("RAKSHAK_LLM_API_KEY"))
 
 
-def is_available() -> bool:
+def is_available(gemini_key: str | None = None) -> bool:
     if os.getenv("ASR_ENABLED", "true").lower() in {"0", "false", "off", "no"}:
         return False
-    return _whisper_present() or _gemini_ready()
+    return _whisper_present() or _gemini_ready(gemini_key)
 
 
-def _transcribe_gemini(path: Path) -> str:
+def _transcribe_gemini(path: Path, gemini_key: str | None = None) -> str:
     import httpx
 
-    api_key = os.getenv("RAKSHAK_LLM_API_KEY", "")
+    api_key = gemini_key or os.getenv("RAKSHAK_LLM_API_KEY", "")
     model = os.getenv("RAKSHAK_TRANSCRIBE_MODEL", "gemini-3.5-flash-lite")
     raw = path.read_bytes()
     b64 = base64.b64encode(raw).decode()
@@ -67,7 +69,7 @@ def _transcribe_gemini(path: Path) -> str:
     return "".join(part.get("text", "") for part in parts if isinstance(part, dict)).strip()
 
 
-def transcribe(path: Path) -> tuple[str, str]:
+def transcribe(path: Path, gemini_key: str | None = None) -> tuple[str, str]:
     """Transcribe an audio file to (text, language). Raises RuntimeError if unavailable."""
     global _model
     if os.getenv("ASR_ENABLED", "true").lower() in {"0", "false", "off", "no"}:
@@ -81,11 +83,11 @@ def transcribe(path: Path) -> tuple[str, str]:
         segments, info = _model.transcribe(str(path), beam_size=1, vad_filter=True)
         text = "".join(segment.text for segment in segments).strip()
         return text, getattr(info, "language", "en") or "en"
-    if _gemini_ready():
+    if _gemini_ready(gemini_key):
         from app.pipeline.normalize import detect_language
 
         try:
-            text = _transcribe_gemini(path)
+            text = _transcribe_gemini(path, gemini_key=gemini_key)
         except Exception as error:
             raise RuntimeError(f"MODEL_NOT_READY: Gemini transcription failed ({str(error)[:150]})") from error
         if not text:

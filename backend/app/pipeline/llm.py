@@ -1,9 +1,9 @@
 """Server-side LLM second opinion (P1+). Gemini or NVIDIA NIM. Graceful None.
 
 Set on the laptop before starting uvicorn:
-  $env:RAKSHAK_LLM_PROVIDER="gemini"   # gemini | nim | off
-  $env:RAKSHAK_LLM_API_KEY="..."
-  # optional: $env:RAKSHAK_LLM_MODEL="gemini-1.5-flash" / "meta/llama-3.1-8b-instruct"
+  $env:RAKSHAK_LLM_PROVIDER="gemini"   # gemini | nim | openai | off
+  $env:RAKSHAK_LLM_API_KEY="..."                # or GEMINI_API_KEY / GOOGLE_API_KEY / OPENAI_API_KEY / NVIDIA_API_KEY
+  # optional: $env:RAKSHAK_LLM_MODEL="gemini-3.5-flash-lite" / "meta/llama-3.1-8b-instruct" / "gpt-4o-mini"
 
 Without a key the pipeline stays rules-only (or e5 hybrid). Offline mode never
 calls the cloud. When enabled, the scanned text IS sent to the provider.
@@ -39,12 +39,43 @@ PROMPT = (
 )
 
 
+DEFAULT_GEMINI_MODEL = "gemini-3.5-flash-lite"
+
+
 def provider() -> str:
-    return os.getenv("RAKSHAK_LLM_PROVIDER", "off").lower()
+    provider_name = os.getenv("RAKSHAK_LLM_PROVIDER", "off").lower()
+    if provider_name not in {"gemini", "nim", "off"} and any(
+        os.getenv(name) for name in ("GEMINI_API_KEY", "GOOGLE_API_KEY", "OPENAI_API_KEY")
+    ):
+        return "gemini" if any(os.getenv(name) for name in ("GEMINI_API_KEY", "GOOGLE_API_KEY")) else "openai"
+    return provider_name
 
 
-def is_available() -> bool:
-    return provider() in {"gemini", "nim"} and bool(os.getenv("RAKSHAK_LLM_API_KEY"))
+def api_key_for(provider_name: str | None = None) -> str:
+    selected = provider_name or provider()
+    names = {
+        "gemini": ("RAKSHAK_LLM_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY"),
+        "nim": ("RAKSHAK_LLM_API_KEY", "NVIDIA_API_KEY"),
+        "openai": ("RAKSHAK_LLM_API_KEY", "OPENAI_API_KEY"),
+    }
+    for name in names.get(selected, ("RAKSHAK_LLM_API_KEY",)):
+        value = os.getenv(name)
+        if value:
+            return value
+    return ""
+
+
+def default_model() -> str:
+    selected = provider()
+    if selected == "openai":
+        return "gpt-4o-mini"
+    return "meta/llama-3.1-8b-instruct" if selected == "nim" else DEFAULT_GEMINI_MODEL
+
+
+def is_available(override_key: str | None = None) -> bool:
+    if override_key:
+        return True
+    return provider() in {"gemini", "nim", "openai"} and bool(api_key_for())
 
 
 def _parse_json(text: str) -> dict | None:
@@ -77,6 +108,16 @@ def _call_nim(api_key: str, model: str, message: str, timeout_s: float) -> str:
     import httpx
 
     url = "https://integrate.api.nvidia.com/v1/chat/completions"
+    return _call_openai_compatible(url, api_key, model, message, timeout_s)
+
+
+def _call_openai(api_key: str, model: str, message: str, timeout_s: float) -> str:
+    return _call_openai_compatible("https://api.openai.com/v1/chat/completions", api_key, model, message, timeout_s)
+
+
+def _call_openai_compatible(url: str, api_key: str, model: str, message: str, timeout_s: float) -> str:
+    import httpx
+
     payload = {
         "model": model,
         "messages": [
@@ -95,20 +136,24 @@ def _call_nim(api_key: str, model: str, message: str, timeout_s: float) -> str:
     return ((choices[0].get("message") or {}).get("content")) or ""
 
 
-def score(text: str) -> tuple[float | None, str | None, str]:
+def score(text: str, override_key: str | None = None) -> tuple[float | None, str | None, str]:
     """Return (p_llm, scam_type_or_None, detail). Never raises."""
-    if not is_available():
+    if not is_available(override_key):
         return None, None, "skipped (no LLM key)"
-    prov = provider()
-    api_key = os.getenv("RAKSHAK_LLM_API_KEY", "")
-    default_model = "gemini-3.5-flash-lite" if prov == "gemini" else "meta/llama-3.1-8b-instruct"
-    model = os.getenv("RAKSHAK_LLM_MODEL", default_model)
+    prov = "gemini" if override_key else provider()
+    api_key = override_key or api_key_for(prov)
+    model = os.getenv("RAKSHAK_LLM_MODEL", default_model())
     try:
-        timeout_s = float(os.getenv("RAKSHAK_LLM_TIMEOUT", "12"))
+        timeout_s = float(os.getenv("RAKSHAK_LLM_TIMEOUT", "25"))
     except ValueError:
-        timeout_s = 12.0
+        timeout_s = 25.0
     try:
-        raw = _call_gemini(api_key, model, text, timeout_s) if prov == "gemini" else _call_nim(api_key, model, text, timeout_s)
+        if prov == "gemini":
+            raw = _call_gemini(api_key, model, text, timeout_s)
+        elif prov == "nim":
+            raw = _call_nim(api_key, model, text, timeout_s)
+        else:
+            raw = _call_openai(api_key, model, text, timeout_s)
         parsed = _parse_json(raw)
         if not parsed:
             return None, None, "unparseable LLM reply"

@@ -74,8 +74,8 @@ def rule_signals(normalized: str) -> tuple[list[Signal], bool, float]:
     return signals, False, probability
 
 
-def analyze_text(text: str) -> AnalysisResult:
+def analyze_text(text: str, gemini_key: str | None = None) -> AnalysisResult:
     # Thin wrapper so existing imports keep working; real orchestration lives in runner.py.
     from app.pipeline.runner import run_pipeline
 
-    return run_pipeline(text)
+    return run_pipeline(text, gemini_key=gemini_key)
